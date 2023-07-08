@@ -1,6 +1,7 @@
+body {
+    width: 400px;
+}
 
-body{
-
-    width: 400px; 
-    
+.selected {
+    color: #007f00;
 }
