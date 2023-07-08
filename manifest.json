@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Mi primera extension",
+    "name": "FrameTimer",
     "version": "1.0",
-    "description": "Esta es mi primera extension",  
+    "description": "A simple extension to time frames in a video.",  
     "icons": {
         "128": "icon128.png"
     },
