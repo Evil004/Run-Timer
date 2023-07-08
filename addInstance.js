@@ -1,3 +1,12 @@
+const addBtn = document.querySelector("#add-btn");
+
+addBtn.addEventListener("click", () => {
+
+    addInstance();
+
+});
+
+
 function addInstance() {
 
     // Crear los elementos para la nueva instancia
@@ -17,13 +26,15 @@ function addInstance() {
     timeInput.placeholder = '00h 00m 00s 000ms';
     timeInput.disabled = true;
 
-    removeButton.onclick = function() {
+    
+    removeButton.addEventListener("click", () => {
         container.remove();
-    };
+    });
 
-    resetButton.onclick = function() {
+    
+    resetButton.addEventListener ("click", () => {
         timeInput.value = '00h 00m 00s 000ms';
-    };
+    });
 
     // Agregar los elementos al container principal
     container.appendChild(selectButton);
@@ -38,11 +49,9 @@ function addInstance() {
 
 
 var resetButton = document.getElementById('reset-btn');
-var timeText = document.getElementById('time-instance-text');
+var timeText = document.getElementById('time-text');
 
-resetButton.onclick = function() {
+
+resetButton.addEventListener ("click", () => {
   timeText.value = '00h 00m 00s 000ms';
-};
-
-
-  // Soy buenísima 😎 (Con voz de Vegeta de Dragon Ball Latino) Óscar te voy a quitar el trabajo putito
+});
