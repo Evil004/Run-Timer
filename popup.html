@@ -7,6 +7,49 @@
     <link  type="text/css" rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Hola mundo</h1>
+    <h1 id="text">Frame Timer</h1>
+
+    <label for="framerate">Framerate: </label>
+
+    <input type="text" id="framerate" value="60">
+
+
+    <label for="time-text">Time: </label>
+
+    <input type="text" id="time-text" placeholder="0s" disabled>
+
+
+    <div class="buttonPane">
+
+        <!-- A disabled buton -->
+
+        <button id="exact-time-btn" >Get Exact Time</button>
+
+        <button id="start-time-btn">Set Start Time</button>
+        <button id="end-time-btn">Set Ending Time</button>
+
+        
+        
+    </div>
+
+    <div class="instances">
+        <button id="select-btn">→</button>
+        <input type="text" id="time-instance-text" placeholder="00h 00m 00s 000ms" disabled>
+        <button id="reset-btn">↻</button>
+      </div>
+      
+
+
+    <div id="instances-container"></div>
+
+    <div class="buttonPane">
+      <button onclick="addInstance()" id="add-btn">+</button>
+      <script src="addInstance.js"></script>
+    </div>
+
+    <label for="calculated-time">Calculated Time: </label>
+    <input type="text" id="calculated-time" placeholder="00h 00m 00s 000ms" disabled>
+
+    <script src="popup.js"></script>
 </body>
 </html>
