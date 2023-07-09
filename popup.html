@@ -13,7 +13,7 @@
         <input type="text" id="framerate" value="60" />
         <br />
         <label for="time-text">Time: </label>
-        <input type="text" id="time-text" value="120.2" />
+        <input type="text" id="time-text" disabled/>
 
         <div class="buttonPane">
             <!-- A disabled button -->
@@ -50,10 +50,13 @@
 
             <button id="calculate-btn">Calculate</button>
             <button id="copy">Copy</button>
+            <button id="reset-all-btn">Reset All</button>
         </div>
 
         <script src="addInstance.js"></script>
-        <script src="popup.js"></script>
         <script src="calculateTotal.js"></script>
+        <script src="saveJSON.js"></script>
+        <script src="popup.js"></script>
+
     </body>
 </html>

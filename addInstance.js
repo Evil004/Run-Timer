@@ -29,10 +29,13 @@ function addInstance() {
 
     removeButton.addEventListener("click", () => {
         container.remove();
+        saveDataToLocalStorage();
     });
 
     resetButton.addEventListener("click", () => {
         timeInput.value = '00h 00m 00s 000ms';
+        resetButton.parentNode.segment = undefined;
+        saveDataToLocalStorage();
     });
 
     // Agregar los elementos al contenedor principal

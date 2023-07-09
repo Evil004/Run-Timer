@@ -3,6 +3,8 @@ const startTimerBtn = document.querySelector("#start-time-btn");
 const endTimerBtn = document.querySelector("#end-time-btn");
 const resetBtn = document.querySelector("#reset-btn");
 const timeText = document.querySelector("#time-text");
+const instancesContainer = document.querySelector("#instances-container");
+const resetAllBtn = document.querySelector("#reset-all-btn");
 
 function Segment(startTime) {
     this.startTime = startTime;
@@ -32,12 +34,40 @@ function Segment(startTime) {
     };
 }
 
+resetAllBtn.addEventListener("click", () => {
+    var contenedores = document.querySelectorAll(".instance");
+
+    timeText.value = "";
+
+    for (let i = 1; i < contenedores.length; i++) {
+        const contenedor = contenedores[i];
+
+        contenedor.remove();
+    }
+
+    resetBtnFunc();
+
+    saveDataToLocalStorage();
+});
+
+function resetBtnFunc() {
+    resetBtn.parentNode.querySelector("#time-instance-text").value =
+        "00h 00m 00s 000ms";
+    resetBtn.parentNode.segment = undefined;
+    saveDataToLocalStorage();
+}
+
+resetBtn.addEventListener("click", () => {
+    resetBtnFunc();
+});
+
 getExactTimeBtn.addEventListener("click", () => {
     injectScript();
+
+    saveDataToLocalStorage();
 });
 
 startTimerBtn.addEventListener("click", () => {
-
     if (timeText.value.trim() == "") {
         alert(
             "No se ha podido el tiempo, usa primero el botón de obtener tiempo"
@@ -46,7 +76,6 @@ startTimerBtn.addEventListener("click", () => {
     }
     var segment = new Segment(timeText.value);
 
-    
     var contenedor = getSelectedInstance();
 
     console.log(contenedor);
@@ -57,10 +86,11 @@ startTimerBtn.addEventListener("click", () => {
     }
 
     contenedor.segment = segment;
+
+    saveDataToLocalStorage();
 });
 
 endTimerBtn.addEventListener("click", () => {
-    
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
@@ -75,20 +105,15 @@ endTimerBtn.addEventListener("click", () => {
         return;
     }
 
-
     segment.endTime = timeText.value;
 
-        
-    contenedor.querySelector('#time-instance-text').value = segment.toString();
-    
-
-    
-
+    contenedor.querySelector("#time-instance-text").value = segment.toString();
+    saveDataToLocalStorage();
 });
 
 function getSelectedInstance() {
     var radioInputs = document.querySelectorAll('input[type="radio"]');
-   
+
     for (var i = 0; i < radioInputs.length; i++) {
         var input = radioInputs[i];
 
@@ -100,27 +125,74 @@ function getSelectedInstance() {
 
             return contenedor;
         }
-    };
+    }
 }
 
-
-
 window.onload = getDataFromLocalStorage;
-window.onbeforeunload = saveDataToLocalStorage;
 
 function saveDataToLocalStorage() {
-    chrome.storage.local.set({ timeData: obj });
+    chrome.storage.local.set({ timeData: createSaveJSON() });
 }
 
 function getDataFromLocalStorage() {
-    chrome.storage.local.get("timeData", function (result) {
-        if (result.timeData) {
-            obj = result.timeData;
-        }
+    debugger;
+    chrome.storage.local.get(["timeData"], function (result) {
+        var obj = result.timeData;
+
+        setData(obj);
     });
+
+    setData(undefined);
 }
-function padZero(number) {
-    return number.toString().padStart(2, "0");
+
+function setData(timeData) {
+    if (timeData == undefined) {
+        return;
+    }
+
+    var segments = timeData.segments;
+    var textTime = timeData.textTime;
+
+    timeText.value = textTime;
+
+    if (segments.length == 0) {
+        return;
+    }
+
+    segment = segments[0];
+
+    var objSegment = new Segment(segment.startTime);
+    objSegment.endTime = segment.endTime;
+
+    var contenedor = instancesContainer.children[0];
+
+    if (objSegment.startTime != null && objSegment.endTime != null) {
+        contenedor.querySelector("#time-instance-text").value = objSegment.toString();
+    }
+
+    contenedor.segment = objSegment;
+
+    for (let i = 1; i < segments.length; i++) {
+        const segment = segments[i];
+
+        var objSegment = new Segment(segment.startTime);
+        objSegment.endTime = segment.endTime;
+
+        addInstance();
+
+        var contenedor = instancesContainer.children[i];
+
+        if (objSegment.startTime != null && objSegment.endTime != null) {
+            contenedor.querySelector("#time-instance-text").value =
+                objSegment.toString();
+        }
+
+        contenedor.segment = objSegment;
+    }
+}
+
+function onLoad() {
+    getDataFromLocalStorage();
 }
 
 function injectScript() {
