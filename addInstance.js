@@ -7,17 +7,23 @@ addBtn.addEventListener("click", () => {
 function addInstance() {
     // Crear los elementos para la nueva instancia
     var container = document.createElement('div');
-    var selectButton = document.createElement('button');
+    var selectButton = document.createElement('input');
     var timeInput = document.createElement('input');
     var removeButton = document.createElement('button');
     var resetButton = document.createElement('button');
 
     // Configurar los atributos y contenido de los elementos
-    container.classList.add('instances');
-    selectButton.textContent = '→';
+    container.classList.add('instance');
+
+    selectButton.type = 'radio';
+    selectButton.name = 'select-instance';
+    selectButton.checked = true;
+    
     resetButton.textContent = '↻';
     removeButton.textContent = '–';
+
     timeInput.type = 'text';
+    timeInput.id = 'time-instance-text';
     timeInput.placeholder = '00h 00m 00s 000ms';
     timeInput.disabled = true;
 

@@ -4,33 +4,108 @@ const endTimerBtn = document.querySelector("#end-time-btn");
 const resetBtn = document.querySelector("#reset-btn");
 const timeText = document.querySelector("#time-text");
 
-let obj = {
-    startTime: null,
-    endTime: null,
-};
+function Segment(startTime) {
+    this.startTime = startTime;
+    this.endTime = null;
+    this.getSeconds = function () {
+        return this.endTime - this.startTime;
+    };
+    this.toString = function () {
+        return this.calculateTime();
+    };
+    this.calculateTime = function () {
+        var segundos = this.getSeconds();
+        var horas = Math.floor(segundos / 3600);
+        var minutos = Math.floor((segundos % 3600) / 60);
+        var segundosRestantes = Math.floor(segundos % 60);
+        var milisegundos = Math.floor((segundos - Math.floor(segundos)) * 1000);
+
+        var tiempoFormateado = "";
+
+        tiempoFormateado += horas.toString().padStart(2, "0") + "h ";
+        tiempoFormateado += minutos.toString().padStart(2, "0") + "m ";
+        tiempoFormateado +=
+            segundosRestantes.toString().padStart(2, "0") + "s ";
+        tiempoFormateado += milisegundos.toString().padStart(3, "0") + "ms";
+
+        return tiempoFormateado;
+    };
+}
 
 getExactTimeBtn.addEventListener("click", () => {
     injectScript();
 });
 
 startTimerBtn.addEventListener("click", () => {
-    obj.startTime = timeText.value.trim();
-    timeText.value = '00h 00m 00s 000ms';
-    saveDataToLocalStorage();
+
+    if (timeText.value.trim() == "") {
+        alert(
+            "No se ha podido el tiempo, usa primero el botón de obtener tiempo"
+        );
+        return;
+    }
+    var segment = new Segment(timeText.value);
+
+    
+    var contenedor = getSelectedInstance();
+
+    console.log(contenedor);
+
+    if (contenedor == null) {
+        alert("No se ha seleccionado ninguna instancia seleccionada");
+        return;
+    }
+
+    contenedor.segment = segment;
 });
 
 endTimerBtn.addEventListener("click", () => {
-    obj.endTime = timeText.value.trim();
-    timeText.value = '00h 00m 00s 000ms';
-    saveDataToLocalStorage();
-    calculateTime();
+    
+    var contenedor = getSelectedInstance();
+
+    if (contenedor == null) {
+        alert("No se ha seleccionado ninguna instancia seleccionada");
+        return;
+    }
+
+    var segment = contenedor.segment;
+
+    if (segment == null) {
+        alert("La instancia seleccionada no tiene un tiempo de inicio");
+        return;
+    }
+
+
+    segment.endTime = timeText.value;
+
+        
+    contenedor.querySelector('#time-instance-text').value = segment.toString();
+    
+
+    
+
 });
 
-function onLoad() {
-    getDataFromLocalStorage();
+function getSelectedInstance() {
+    var radioInputs = document.querySelectorAll('input[type="radio"]');
+   
+    for (var i = 0; i < radioInputs.length; i++) {
+        var input = radioInputs[i];
+
+        // Verificar si el radio input está seleccionado
+
+        if (input.checked) {
+            // Obtener el contenedor más cercano con la clase "contenedor"
+            var contenedor = input.closest(".instance");
+
+            return contenedor;
+        }
+    };
 }
 
-window.onload = onLoad;
+
+
+window.onload = getDataFromLocalStorage;
 window.onbeforeunload = saveDataToLocalStorage;
 
 function saveDataToLocalStorage() {
@@ -44,66 +119,31 @@ function getDataFromLocalStorage() {
         }
     });
 }
-
-function calculateTime() {
-    if (obj.startTime && obj.endTime) {
-        const startTime = parseTime(obj.startTime);
-        const endTime = parseTime(obj.endTime);
-
-        if (startTime !== null && endTime !== null) {
-            const timeDifference = endTime - startTime;
-
-            const hours = Math.floor(timeDifference / 3600000);
-            const minutes = Math.floor((timeDifference % 3600000) / 60000);
-            const seconds = Math.floor((timeDifference % 60000) / 1000);
-            const milliseconds = timeDifference % 1000;
-
-            const calculatedTime = `${padZero(hours)}h ${padZero(minutes)}m ${padZero(seconds)}s ${padZero(milliseconds)}ms`;
-            document.getElementById("calculated-time").value = calculatedTime;
-        } else {
-            alert("Invalid time format. Please set the time in the format '00h 00m 00s 000ms'.");
-        }
-    } else {
-        alert("Please set both start time and end time.");
-    }
-}
-
-function parseTime(timeString) {
-    const regex = /(\d+)h\s+(\d+)m\s+(\d+)s\s+(\d+)ms/;
-    const match = timeString.match(regex);
-
-    if (match) {
-        const hours = parseInt(match[1], 10);
-        const minutes = parseInt(match[2], 10);
-        const seconds = parseInt(match[3], 10);
-        const milliseconds = parseInt(match[4], 10);
-
-        return hours * 3600000 + minutes * 60000 + seconds * 1000 + milliseconds;
-    }
-
-    return null;
-}
-
 function padZero(number) {
     return number.toString().padStart(2, "0");
 }
 
 function injectScript() {
-    chrome.tabs.query({ active: true, currentWindow: true }).then(function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
+    chrome.tabs
+        .query({ active: true, currentWindow: true })
+        .then(function (tabs) {
+            var activeTab = tabs[0];
+            var activeTabId = activeTab.id;
 
-        return chrome.scripting.executeScript({
-            target: { tabId: activeTabId },
-            func: GetExactSecond,
+            return chrome.scripting.executeScript({
+                target: { tabId: activeTabId },
+                func: GetExactSecond,
+            });
+        })
+        .then(function (results) {
+            timeText.value = results[0].result;
+        })
+        .catch(function (err) {
+            alert("No se ha podido obtener el tiempo exacto");
         });
-    }).then(function (results) {
-        timeText.value = results[0].result;
-    }).catch(function (err) {
-        alert("No se ha podido obtener el tiempo exacto");
-    });
 }
 
 function GetExactSecond(selector) {
-    return document.getElementsByClassName("video-stream html5-main-video")[0].currentTime;
+    return document.getElementsByClassName("video-stream html5-main-video")[0]
+        .currentTime;
 }
