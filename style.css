@@ -2,6 +2,6 @@ body {
     width: 400px;
 }
 
-.selected {
+#time-instance-text {
     color: #007f00;
 }

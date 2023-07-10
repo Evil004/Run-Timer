@@ -2,16 +2,18 @@
     "manifest_version": 3,
     "name": "FrameTimer",
     "version": "1.0",
-    "description": "A simple extension to time frames in a video.",  
+    "description": "A simple extension to time frames in a video.",
     "icons": {
         "128": "icon128.png"
     },
     "action": {
         "default_popup": "popup.html"
     },
-    "permissions": [
-        "scripting",
-        "activeTab",
-        "storage"
+    "permissions": ["scripting", "activeTab", "storage"],
+    "content_scripts": [
+        {
+            "matches": ["https://www.youtube.com/*", "https://youtu.be/*"],
+            "js": ["scripts/inject.js"]
+        }
     ]
 }
