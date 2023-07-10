@@ -1,5 +1,16 @@
 const timeText = document.querySelector("#time-text");
 const instancesContainer = document.querySelector("#instances-container");
+const sendMessageBtn = document.querySelector("#send-msg-btn");
+const videoSelect = document.querySelector("#video-select");
+
+function addSelectItem(obj){
+
+   var option = document.createElement('option');
+    option.innerHTML = "video: " + videoSelect.children.length;
+
+    videoSelect.appendChild(option);
+
+}
 
 function Segment(startTime) {
     this.startTime = startTime;
@@ -119,63 +130,4 @@ function setData(timeData) {
 
 function onLoad() {
     getDataFromLocalStorage();
-}
-
-function injectScript() {
-    chrome.tabs
-        .query({ active: true, currentWindow: true })
-        .then(function (tabs) {
-            var activeTab = tabs[0];
-            var activeTabId = activeTab.id;
-
-            if (activeTab.url.includes("youtube") == false) {
-                return chrome.scripting.executeScript({
-                    target: { tabId: activeTabId },
-                    func: GetExactSecond,
-                });
-            }
-
-            return chrome.scripting.executeScript({
-                target: { tabId: activeTabId },
-                func: getExactSecondsYT,
-            });
-        })
-        .then(function (results) {
-            timeText.value = results[0].result;
-        })
-        .catch(function (err) {
-            alert(
-                "The exact time could not be obtained, make sure you are playing a video on YouTube."
-            );
-            console.log(err);
-        });
-}
-
-function getExactSecondsYT() {
-    var video = document.getElementsByClassName(
-        "video-stream html5-main-video"
-    )[0];
-    return video.currentTime;
-}
-
-function GetExactSecond() {
-    /*debugger;
-    console.log(document.getElementsByTagName("video"));
-    var videos = document.getElementsByClassName(
-        "video-stream html5-main-video"
-    );
-    var video = videos[0];
-    return video.currentTime;*/
-
-    var frameTags = document.getElementsByTagName("iframe");
-
-    for (let i = 0; i < frameTags.length; i++) {
-        const frameTag = frameTags[i];
-
-        if (frameTag.src.includes("youtube")) {
-            var iframeDocument = frameTag.contentDocument;
-            console.log(iframeDocument);
-        }
-    }
-
 }

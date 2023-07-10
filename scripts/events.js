@@ -27,10 +27,24 @@ resetBtn.addEventListener("click", () => {
 
 getExactTimeBtn.addEventListener("click", () => {
     
-    injectScript();
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var activeTabId = activeTab.id;
 
-    //saveDataToLocalStorage();
+        console.log(tabs);
+
+        chrome.tabs.sendMessage(
+            activeTabId,
+            { message: "getExactTime", videoId: 0 },
+            function (response) {
+                timeText.value = response.response;
+            }
+        );
+    });
+
 });
+
+
 
 var player;
 

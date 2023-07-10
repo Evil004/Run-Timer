@@ -13,7 +13,11 @@
     "content_scripts": [
         {
             "matches": ["https://www.youtube.com/*", "https://youtu.be/*"],
-            "js": ["scripts/inject.js"]
+            "js": ["inject.js"],
+
+            "all_frames": true
         }
-    ]
+    ],
+    
+    "host_permissions": ["<all_urls>"]
 }
