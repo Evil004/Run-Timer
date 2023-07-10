@@ -1,10 +1,5 @@
-const getExactTimeBtn = document.querySelector("#exact-time-btn");
-const startTimerBtn = document.querySelector("#start-time-btn");
-const endTimerBtn = document.querySelector("#end-time-btn");
-const resetBtn = document.querySelector("#reset-btn");
 const timeText = document.querySelector("#time-text");
 const instancesContainer = document.querySelector("#instances-container");
-const resetAllBtn = document.querySelector("#reset-all-btn");
 
 function Segment(startTime) {
     this.startTime = startTime;
@@ -34,82 +29,12 @@ function Segment(startTime) {
     };
 }
 
-resetAllBtn.addEventListener("click", () => {
-    var contenedores = document.querySelectorAll(".instance");
-
-    timeText.value = "";
-
-    for (let i = 1; i < contenedores.length; i++) {
-        const contenedor = contenedores[i];
-
-        contenedor.remove();
-    }
-
-    resetBtnFunc();
-
-    saveDataToLocalStorage();
-});
-
 function resetBtnFunc() {
     resetBtn.parentNode.querySelector("#time-instance-text").value =
         "00h 00m 00s 000ms";
     resetBtn.parentNode.segment = undefined;
     saveDataToLocalStorage();
 }
-
-resetBtn.addEventListener("click", () => {
-    resetBtnFunc();
-});
-
-getExactTimeBtn.addEventListener("click", () => {
-    injectScript();
-
-    saveDataToLocalStorage();
-});
-
-startTimerBtn.addEventListener("click", () => {
-    if (timeText.value.trim() == "") {
-        alert(
-            "No se ha podido el tiempo, usa primero el botón de obtener tiempo"
-        );
-        return;
-    }
-    var segment = new Segment(timeText.value);
-
-    var contenedor = getSelectedInstance();
-
-    console.log(contenedor);
-
-    if (contenedor == null) {
-        alert("No se ha seleccionado ninguna instancia seleccionada");
-        return;
-    }
-
-    contenedor.segment = segment;
-
-    saveDataToLocalStorage();
-});
-
-endTimerBtn.addEventListener("click", () => {
-    var contenedor = getSelectedInstance();
-
-    if (contenedor == null) {
-        alert("No se ha seleccionado ninguna instancia seleccionada");
-        return;
-    }
-
-    var segment = contenedor.segment;
-
-    if (segment == null) {
-        alert("La instancia seleccionada no tiene un tiempo de inicio");
-        return;
-    }
-
-    segment.endTime = timeText.value;
-
-    contenedor.querySelector("#time-instance-text").value = segment.toString();
-    saveDataToLocalStorage();
-});
 
 function getSelectedInstance() {
     var radioInputs = document.querySelectorAll('input[type="radio"]');
@@ -167,7 +92,8 @@ function setData(timeData) {
     var contenedor = instancesContainer.children[0];
 
     if (objSegment.startTime != null && objSegment.endTime != null) {
-        contenedor.querySelector("#time-instance-text").value = objSegment.toString();
+        contenedor.querySelector("#time-instance-text").value =
+            objSegment.toString();
     }
 
     contenedor.segment = objSegment;
@@ -202,20 +128,54 @@ function injectScript() {
             var activeTab = tabs[0];
             var activeTabId = activeTab.id;
 
+            if (activeTab.url.includes("youtube") == false) {
+                return chrome.scripting.executeScript({
+                    target: { tabId: activeTabId },
+                    func: GetExactSecond,
+                });
+            }
+
             return chrome.scripting.executeScript({
                 target: { tabId: activeTabId },
-                func: GetExactSecond,
+                func: getExactSecondsYT,
             });
         })
         .then(function (results) {
             timeText.value = results[0].result;
         })
         .catch(function (err) {
-            alert("No se ha podido obtener el tiempo exacto");
+            alert(
+                "The exact time could not be obtained, make sure you are playing a video on YouTube."
+            );
+            console.log(err);
         });
 }
 
-function GetExactSecond(selector) {
-    return document.getElementsByClassName("video-stream html5-main-video")[0]
-        .currentTime;
+function getExactSecondsYT() {
+    var video = document.getElementsByClassName(
+        "video-stream html5-main-video"
+    )[0];
+    return video.currentTime;
+}
+
+function GetExactSecond() {
+    /*debugger;
+    console.log(document.getElementsByTagName("video"));
+    var videos = document.getElementsByClassName(
+        "video-stream html5-main-video"
+    );
+    var video = videos[0];
+    return video.currentTime;*/
+
+    var frameTags = document.getElementsByTagName("iframe");
+
+    for (let i = 0; i < frameTags.length; i++) {
+        const frameTag = frameTags[i];
+
+        if (frameTag.src.includes("youtube")) {
+            var iframeDocument = frameTag.contentDocument;
+            console.log(iframeDocument);
+        }
+    }
+
 }

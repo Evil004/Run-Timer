@@ -13,11 +13,10 @@
         <input type="text" id="framerate" value="60" />
         <br />
         <label for="time-text">Time: </label>
-        <input type="text" id="time-text" disabled/>
+        <input type="text" id="time-text" disabled />
+        <button id="exact-time-btn">Get Exact Time</button>
 
         <div class="buttonPane">
-            <!-- A disabled button -->
-            <button id="exact-time-btn">Get Exact Time</button>
             <button id="start-time-btn">Set Start Time</button>
             <button id="end-time-btn">Set Ending Time</button>
         </div>
@@ -53,10 +52,11 @@
             <button id="reset-all-btn">Reset All</button>
         </div>
 
-        <script src="addInstance.js"></script>
-        <script src="calculateTotal.js"></script>
-        <script src="saveJSON.js"></script>
-        <script src="popup.js"></script>
 
+        <script src="scripts/addInstance.js"></script>
+        <script src="scripts/calculateTotal.js"></script>
+        <script src="scripts/saveJSON.js"></script>
+        <script src="scripts/popup.js"></script>
+        <script src="scripts/events.js"></script>
     </body>
 </html>
