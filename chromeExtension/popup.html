@@ -7,15 +7,15 @@
         <link type="text/css" rel="stylesheet" href="style.css" />
     </head>
     <body>
-
         <h1 id="text">Frame Timer</h1>
 
-        <label for="framerate">Framerate: </label>
-        <input type="text" id="framerate" value="60" />
-        <br />
-        <label for="time-text">Time: </label>
-        <input type="text" id="time-text" disabled />
-        <button id="exact-time-btn">Get Exact Time</button>
+        <div class="video-data">
+            <input type="text" id="framerate" placeholder="FRAMERATE" />
+            <br />
+            <label for="time-text">FRAME: </label>
+            <input type="text" id="time-text" disabled value="0.0" />
+            <button id="exact-time-btn">Get Exact Time</button>
+        </div>
 
         <div class="buttonPane">
             <button id="start-time-btn">Set Start Time</button>
@@ -24,17 +24,15 @@
 
         <div id="instances-container">
             <div class="instance">
-                <input type="radio" name="select-instance" checked />
-                <input
-                    type="text"
-                    id="time-instance-text"
-                    placeholder="00h 00m 00s 000ms"
-                    disabled
-                />
-                <button id="reset-btn">↻</button>
+                <button id="time-instance-btn"> <div> 00h 00m 00s 000ms </div> </button>
+                <button id="reset-btn"> R</button>
             </div>
         </div>
-        <button id="add-btn">+</button>
+
+        <div>
+            <button id="add-btn">A</button>
+        </div>
+
         <br />
 
         <div id="calculated-time-container">
@@ -42,14 +40,14 @@
             <input
                 type="text"
                 id="calculated-time"
-                placeholder="00h 00m 00s 000ms"
+                value="00h 00m 00s 000ms"
                 disabled
             />
 
             <br />
 
             <button id="calculate-btn">Calculate</button>
-            <button id="copy">Copy</button>
+            <button id="copy-btn">Copy</button>
             <button id="reset-all-btn">Reset All</button>
         </div>
 

@@ -222,6 +222,10 @@ function addInstance() {
     timeInput.disabled = true;
 
     removeButton.addEventListener("click", () => {
+        console.log("trying to remove");
+        if(container.querySelector("input").checked) {
+            container.previousElementSibling.querySelector("input").checked = true;
+        }
         container.remove();
         saveDataToLocalStorage();
     });

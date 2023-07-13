@@ -10,6 +10,8 @@ const startTimerBtn = document.querySelector("#start-time-btn");
 const endTimerBtn = document.querySelector("#end-time-btn");
 const resetBtn = document.querySelector("#reset-btn");
 const resetAllBtn = document.querySelector("#reset-all-btn");
+const copyBtn = document.querySelector("#copy-btn");
+const timeInput = document.querySelector("#time-instance-btn");
 
 // ----------------- Basic Funcionality -----------------
 
@@ -42,7 +44,7 @@ function Segment(startTime) {
 }
 
 function resetBtnFunc() {
-    resetBtn.parentNode.querySelector("#time-instance-text").value =
+    resetBtn.parentNode.querySelector("#time-instance-btn").value =
         "00h 00m 00s 000ms";
     resetBtn.parentNode.segment = undefined;
     saveDataToLocalStorage();
@@ -103,7 +105,7 @@ function setData(timeData) {
     var contenedor = instancesContainer.children[0];
 
     if (objSegment.startTime != null && objSegment.endTime != null) {
-        contenedor.querySelector("#time-instance-text").value =
+        contenedor.querySelector("#time-instance-btn").value =
             objSegment.toString();
     }
 
@@ -120,7 +122,7 @@ function setData(timeData) {
         var contenedor = instancesContainer.children[i];
 
         if (objSegment.startTime != null && objSegment.endTime != null) {
-            contenedor.querySelector("#time-instance-text").value =
+            contenedor.querySelector("#time-instance-btn").value =
                 objSegment.toString();
         }
 
@@ -130,6 +132,17 @@ function setData(timeData) {
 
 function onLoad() {
     getDataFromLocalStorage();
+}
+
+function changeSelectedInstance(timeInput) {
+    instancesContainer
+        .querySelectorAll("#time-instance-btn")
+        .forEach((button) => {
+            button.style.backgroundColor = "";
+            button.checked = false;
+        });
+    timeInput.style.backgroundColor = "";
+    timeInput.checked = true;
 }
 
 // ------------- Create JSON ----------------
@@ -179,7 +192,6 @@ function calculateTotalTime() {
 
     var totalSegment = new Segment(0);
 
-
     for (let i = 0; i < segmets.length; i++) {
         const segment = segmets[i].segment;
         var seconds = segment.getSeconds();
@@ -203,43 +215,33 @@ calculateBtn.addEventListener("click", () => {
 
 function addInstance() {
     // Crear los elementos para la nueva instancia
-    var container = document.createElement("div");
-    var selectButton = document.createElement("input");
-    var timeInput = document.createElement("input");
     var removeButton = document.createElement("button");
-    var resetButton = document.createElement("button");
 
     // Configurar los atributos y contenido de los elementos
-    container.classList.add("instance");
+    var newChild = instancesContainer.childNodes[0];
 
-    selectButton.type = "radio";
-    selectButton.name = "select-instance";
-    selectButton.checked = true;
+    removeButton.textContent = "-";
 
-    resetButton.textContent = "↻";
-    removeButton.textContent = "–";
+    //timeInput.type = "text";
+    
+    
+    changeSelectedInstance(timeInput);
 
-    timeInput.type = "text";
-    timeInput.id = "time-instance-text";
-    timeInput.placeholder = "00h 00m 00s 000ms";
-    timeInput.disabled = true;
+    //timeInput.disabled = true;
 
     removeButton.addEventListener("click", () => {
-        container.remove();
-        saveDataToLocalStorage();
-    });
 
-    resetButton.addEventListener("click", () => {
-        timeInput.value = "00h 00m 00s 000ms";
-        resetButton.parentNode.segment = undefined;
+        if (newChild.querySelector("#time-instance-btn").checked) {
+            changeSelectedInstance(newChild.previousElementSibling.querySelector("#time-instance-btn"));
+        }
+
+        newChild.remove();
         saveDataToLocalStorage();
     });
 
     // Agregar los elementos al contenedor principal
-    container.appendChild(selectButton);
-    container.appendChild(timeInput);
-    container.appendChild(resetButton);
-    container.appendChild(removeButton);
+
+    newChild.appendChild(removeButton);
 
     // Obtener el contenedor de instancias y agregar la nueva instancia
     var instancesContainer = document.getElementById("instances-container");
@@ -248,10 +250,16 @@ function addInstance() {
 
 // ----------------- Event Listeners -----------------
 
+copyBtn.addEventListener("click", () => {
+    var text = calculatedTimeText.value;
+    navigator.clipboard.writeText(text).then(function () {
+        alert("Copied to clipboard");
+    });
+});
+
 addBtn.addEventListener("click", () => {
     addInstance();
 });
-
 
 resetAllBtn.addEventListener("click", () => {
     var contenedores = document.querySelectorAll(".instance");
@@ -278,7 +286,6 @@ getExactTimeBtn.addEventListener("click", () => {
         var activeTab = tabs[0];
         var activeTabId = activeTab.id;
 
-
         chrome.tabs.sendMessage(
             activeTabId,
             { message: "getExactTime", videoId: 0 },
@@ -289,7 +296,6 @@ getExactTimeBtn.addEventListener("click", () => {
     });
 });
 
-
 startTimerBtn.addEventListener("click", () => {
     if (timeText.value.trim() == "") {
         alert("You have not selected a second, hit 'Get exact time' first.");
@@ -298,7 +304,6 @@ startTimerBtn.addEventListener("click", () => {
     var segment = new Segment(timeText.value);
 
     var contenedor = getSelectedInstance();
-
 
     if (contenedor == null) {
         alert("No se ha seleccionado ninguna instancia seleccionada");
@@ -327,6 +332,22 @@ endTimerBtn.addEventListener("click", () => {
 
     segment.endTime = timeText.value;
 
-    contenedor.querySelector("#time-instance-text").value = segment.toString();
+    contenedor.querySelector("#time-instance-btn").value = segment.toString();
     saveDataToLocalStorage();
 });
+
+timeInput.addEventListener("click", () => {
+    instancesContainer
+        .querySelectorAll("#time-instance-btn")
+        .forEach((button) => {
+            button.style.backgroundColor = "";
+            timeInput.checked = false;
+        });
+    timeInput.style.backgroundColor = "";
+    timeInput.checked = true;
+});
+
+// ----------------- Execute -----------------
+
+timeInput.style.backgroundColor = "";
+timeInput.checked = true;

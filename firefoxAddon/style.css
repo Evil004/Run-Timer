@@ -1,7 +1,24 @@
 body {
-    width: 400px;
+    width: 350px;
+
+    background-color: #0f0f0f;
+
+    color: #ffffff;
+
 }
 
-#time-instance-text {
-    color: #007f00;
+body > div {
+    background-color: #272727;
+    border-radius: 20px;
+
+    padding: 3px;
+    margin: 3px;
+    padding-left: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
 }
+
+
+  

@@ -1,7 +1,69 @@
-body {
-    width: 400px;
+@font-face {
+  font-family: helsinki;
+  src: url(helsinki.ttf);
 }
 
-#time-instance-text {
-    color: #007f00;
+*{
+  margin: 5px;
+
+}
+
+button{
+  background: none;
+  border: none;
+  color: #fafafa;
+
+  font-family: helsinki;
+  font-size: 20px;
+
+  padding: 7px;
+  border-radius: 5px;
+}
+
+button:hover{
+  background-color: #272727;
+}
+
+body {
+  font-family: Hels;
+  background-color: #0f0f0f;
+  color: #f2f2f2;
+  font-family: helsinki;
+}
+
+input[type="text"] {
+  background-color: #272727;
+  color: #f2f2f2;
+  border: 0;
+  font-size: 20px;
+  font-family: helsinki;
+  border-radius: 5px;
+  padding: 7px;
+
+}
+
+#framerate{
+  width: 115px;
+}
+
+#time-text{
+  width: 110px;
+  color: #fafafa;
+}
+
+#time-instance-btn{
+  background-color: #272727;
+}
+
+#time-instance-btn:hover > div{
+  padding: 5px;
+
+  background-color: #303030;
+}
+
+#time-instance-btn:hover{
+  padding: 2px;
+
+  background-color: #444444;
+
 }
