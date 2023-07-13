@@ -9,7 +9,7 @@
     "action": {
         "default_popup": "popup.html"
     },
-    "permissions": ["scripting", "activeTab", "storage"],
+    "permissions": ["storage"],
     "content_scripts": [
         {
             "matches": ["https://www.youtube.com/*", "https://youtu.be/*"],
@@ -18,6 +18,6 @@
             "all_frames": true
         }
     ],
-    
+
     "host_permissions": ["<all_urls>"]
 }
