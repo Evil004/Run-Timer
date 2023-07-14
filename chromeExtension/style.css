@@ -25,6 +25,7 @@ button:hover{
 }
 
 body {
+  width: 500px;
   font-family: Hels;
   background-color: #0f0f0f;
   color: #f2f2f2;
@@ -52,6 +53,7 @@ input[type="text"] {
 }
 
 #time-instance-btn{
+  width: 220px;
   background-color: #272727;
 }
 
