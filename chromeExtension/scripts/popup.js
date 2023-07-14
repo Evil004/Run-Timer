@@ -36,7 +36,7 @@ function Segment(startTime) {
         tiempoFormateado += horas.toString().padStart(2, "0") + "h ";
         tiempoFormateado += minutos.toString().padStart(2, "0") + "m ";
         tiempoFormateado +=
-        segundosRestantes.toString().padStart(2, "0") + "s ";
+            segundosRestantes.toString().padStart(2, "0") + "s ";
         tiempoFormateado += milisegundos.toString().padStart(3, "0") + "ms";
 
         return tiempoFormateado;
@@ -84,13 +84,9 @@ function getDataFromLocalStorage() {
 }
 
 function setData(timeData) {
-
-
-
     if (timeData == undefined) {
         return;
     }
-
 
     var segments = timeData.segments;
     var framerate = timeData.framerate;
@@ -118,7 +114,7 @@ function setData(timeData) {
     if (objSegment.startTime != null && objSegment.endTime != null) {
         contenedor.querySelector("#instance-value").innerHTML =
             objSegment.toString();
-            sleep(12)
+        sleep(12);
     }
 
     contenedor.segment = objSegment;
@@ -230,6 +226,11 @@ function addInstance() {
     // Crear los elementos para la nueva instancia
     var removeButton = document.createElement("button");
 
+    var removeImg = document.createElement("img");
+
+    removeImg.src = "icons/remove.png";
+
+    removeButton.appendChild(removeImg);
 
 
     // Configurar los atributos y contenido de los elementos
@@ -238,10 +239,9 @@ function addInstance() {
     var resetBtn = newChild.querySelector("#reset-btn");
 
     resetBtn.addEventListener("click", () => {
-        resetBtnFunc(resetBtn)
-        });
+        resetBtnFunc(resetBtn);
+    });
 
-    removeButton.textContent = "-";
 
     newChild.segment = undefined;
     newChild.querySelector("#instance-value").innerHTML = "00h 00m 00s 000ms";
@@ -312,7 +312,8 @@ resetAllBtn.addEventListener("click", () => {
 
     contenedores[0].segment = undefined;
 
-    contenedores[0].querySelector("#instance-value").innerHTML = "00h 00m 00s 000ms"
+    contenedores[0].querySelector("#instance-value").innerHTML =
+        "00h 00m 00s 000ms";
 
     changeSelectedInstance(document.querySelector("#time-instance-btn"));
 

@@ -1,76 +1,118 @@
 @font-face {
-  font-family: helsinki;
-  src: url(helsinki.ttf);
+    font-family: helsinki;
+    src: url(helsinki.ttf);
 }
 
-*{
-  margin: 5px;
-
+html {
+    margin: 0px;
 }
 
-button{
-  background: none;
-  border: none;
-  color: #fafafa;
-
-  font-family: helsinki;
-  font-size: 20px;
-
-  padding: 7px;
-  border-radius: 5px;
+* {
+    margin: 5px;
 }
 
-button:hover{
-  background-color: #272727;
+label{
+    font-size: 20px;
+}
+
+button {
+    background: none;
+    border: none;
+    color: #fafafa;
+
+    font-family: helsinki;
+    font-size: 20px;
+
+    padding: 7px;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #272727;
 }
 
 body {
-  width: 500px;
-  font-family: Hels;
-  background-color: #0f0f0f;
-  color: #f2f2f2;
-  font-family: helsinki;
+    margin: 0px;
+    width: 425px;
+    font-family: Hels;
+    background-color: #0f0f0f;
+    color: #f2f2f2;
+    font-family: helsinki;
+
+    margin-bottom: 4px;
+
+    border: 1px solid #fff;
+
+    border-radius: 10px;
+}
+
+button:active {
+    background-color: #484848;
 }
 
 input[type="text"] {
-  background-color: #272727;
-  color: #f2f2f2;
-  border: 0;
-  font-size: 20px;
-  font-family: helsinki;
-  border-radius: 5px;
-  padding: 7px;
-
+    background-color: #272727;
+    color: #f2f2f2;
+    border: 0;
+    font-size: 20px;
+    font-family: helsinki;
+    border-radius: 5px;
+    padding: 7px;
 }
 
-#framerate{
-  width: 115px;
+#framerate {
+    width: 115px;
 }
 
-#time-text{
-  width: 110px;
-  color: #fafafa;
+#time-text {
+    width: 110px;
+    color: #fafafa;
 }
 
-#time-instance-btn{
-  width: 220px;
-  background-color: #272727;
+#time-instance-btn {
+    width: 220px;
+    background-color: #272727;
 }
 
-#time-instance-btn:hover > div{
-  padding: 5px;
+#time-instance-btn:hover > div {
+    padding: 5px;
 
-  background-color: #303030;
+    background-color: #303030;
 }
 
-#time-instance-btn:hover{
-  padding: 2px;
+#time-instance-btn:hover {
+    padding: 2px;
 
-  background-color: #444444;
-
+    background-color: #444444;
 }
 
+#time-instance-btn[checked="true"] {
+    background-color: #838383;
+}
 
-#time-instance-btn[checked="true"]{
-  background-color: #f0f;
+#time-instance-btn:active {
+    background-color: #484848;
+}
+
+#time-instance-btn:active > div {
+    background-color: #484848;
+}
+
+img{
+    width: 20px;
+    vertical-align: middle;
+}
+
+a:visited{
+    
+    color: #0465ec;
+}
+
+p{
+    font-size: 20px;
+}
+
+a{
+    font-size: 20px;
+
 }
