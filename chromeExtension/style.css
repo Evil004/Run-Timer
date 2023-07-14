@@ -99,9 +99,11 @@ input[type="text"] {
 }
 
 img{
-    width: 20px;
+    width: 15px;
     vertical-align: middle;
 }
+
+
 
 a:visited{
     
@@ -114,5 +116,7 @@ p{
 
 a{
     font-size: 20px;
+    color: #0465ec;
+
 
 }

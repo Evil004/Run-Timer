@@ -12,6 +12,7 @@ const resetBtn = document.querySelector("#reset-btn");
 const resetAllBtn = document.querySelector("#reset-all-btn");
 const copyBtn = document.querySelector("#copy-btn");
 const timeInput = document.querySelector("#time-instance-btn");
+const framerateInput = document.querySelector("#framerate");
 
 // ----------------- Basic Funcionality -----------------
 
@@ -90,6 +91,7 @@ function setData(timeData) {
 
     var segments = timeData.segments;
     var framerate = timeData.framerate;
+    console.log(framerate);
     var textTime = timeData.textTime;
 
     if (framerate == undefined) {
@@ -226,11 +228,14 @@ function addInstance() {
     // Crear los elementos para la nueva instancia
     var removeButton = document.createElement("button");
 
+
     var removeImg = document.createElement("img");
 
     removeImg.src = "icons/remove.png";
 
     removeButton.appendChild(removeImg);
+
+    removeButton.classList.add("icon");
 
 
     // Configurar los atributos y contenido de los elementos
@@ -274,7 +279,7 @@ function addInstance() {
         }
 
         newChild.remove();
-        //saveDataToLocalStorage();
+        saveDataToLocalStorage();
     });
 
     // Agregar los elementos al contenedor principal
@@ -382,6 +387,11 @@ endTimerBtn.addEventListener("click", () => {
 
 timeInput.addEventListener("click", () => {
     changeSelectedInstance(timeInput);
+});
+
+
+framerateInput.addEventListener("change", () => {
+    saveDataToLocalStorage();
 });
 
 // ----------------- Execute -----------------
