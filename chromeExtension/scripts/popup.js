@@ -44,7 +44,6 @@ function Segment(startTime) {
 }
 
 function resetBtnFunc(resetBtn) {
-    console.log(resetBtn);
     resetBtn.parentNode.querySelector("#instance-value").innerHTML =
         "00h 00m 00s 000ms";
     resetBtn.parentNode.segment = undefined;
@@ -85,14 +84,23 @@ function getDataFromLocalStorage() {
 }
 
 function setData(timeData) {
+
+
+
     if (timeData == undefined) {
         return;
     }
 
-    console.log("Setting data...");
 
     var segments = timeData.segments;
+    var framerate = timeData.framerate;
     var textTime = timeData.textTime;
+
+    if (framerate == undefined) {
+        framerate = "";
+    }
+
+    document.querySelector("#framerate").value = framerate;
 
     timeText.value = textTime;
 
@@ -110,6 +118,7 @@ function setData(timeData) {
     if (objSegment.startTime != null && objSegment.endTime != null) {
         contenedor.querySelector("#instance-value").innerHTML =
             objSegment.toString();
+            sleep(12)
     }
 
     contenedor.segment = objSegment;
@@ -176,8 +185,10 @@ function getAllSegments() {
 
 function createSaveJSON() {
     var obj = getAllSegments();
+    var framerate = document.querySelector("#framerate").value;
 
     var jsonObj = {
+        framerate: framerate,
         segments: obj,
         textTime: timeText.value,
     };
@@ -288,9 +299,10 @@ addBtn.addEventListener("click", () => {
 });
 
 resetAllBtn.addEventListener("click", () => {
+    document.querySelector("#framerate").value = "";
     var contenedores = document.querySelectorAll(".instance");
 
-    timeText.value = "";
+    timeText.value = "0.0";
 
     for (let i = 1; i < contenedores.length; i++) {
         const contenedor = contenedores[i];
@@ -298,7 +310,11 @@ resetAllBtn.addEventListener("click", () => {
         contenedor.remove();
     }
 
-    //resetBtnFunc();
+    contenedores[0].segment = undefined;
+
+    contenedores[0].querySelector("#instance-value").innerHTML = "00h 00m 00s 000ms"
+
+    changeSelectedInstance(document.querySelector("#time-instance-btn"));
 
     saveDataToLocalStorage();
 });
@@ -360,7 +376,6 @@ endTimerBtn.addEventListener("click", () => {
 
     contenedor.querySelector("#instance-value").innerHTML =
         contenedor.segment.toString();
-    console.log(contenedor);
     saveDataToLocalStorage();
 });
 
