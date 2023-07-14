@@ -11,7 +11,7 @@ html {
     margin: 5px;
 }
 
-label{
+label {
     font-size: 20px;
 }
 
@@ -41,10 +41,18 @@ body {
 
     margin-bottom: 4px;
 
-    border: 1px solid #fff;
-
-    border-radius: 10px;
+    
 }
+
+header {
+    display: flex;
+    align-items: center;
+}
+
+h1 {
+    margin-right: auto;
+}
+
 
 button:active {
     background-color: #484848;
@@ -60,6 +68,7 @@ input[type="text"] {
     padding: 7px;
 }
 
+
 #framerate {
     width: 115px;
 }
@@ -71,12 +80,12 @@ input[type="text"] {
 
 #time-instance-btn {
     width: 220px;
+    padding: 2px;
+
     background-color: #272727;
 }
 
 #time-instance-btn:hover > div {
-    padding: 5px;
-
     background-color: #303030;
 }
 
@@ -98,25 +107,44 @@ input[type="text"] {
     background-color: #484848;
 }
 
-img{
-    width: 15px;
+img {
+    width: 23px;
     vertical-align: middle;
 }
 
+p {
+    font-size: 20px;
+}
 
+a {
+    font-size: 20px;
+    color: #0465ec;
+}
 
-a:visited{
+a:visited {
+    color: #0465ec;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #00000000;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
     
-    color: #0465ec;
+    margin: 15px;
 }
 
-p{
-    font-size: 20px;
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
-a{
-    font-size: 20px;
-    color: #0465ec;
 
-
-}

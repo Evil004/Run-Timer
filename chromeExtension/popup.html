@@ -7,13 +7,17 @@
         <link type="text/css" rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <h1 id="text">Frame Timer</h1>
+        <header>
+            <h1>Frame Timer</h1>
+            
+            <a href="https://github.com/Evil004/FrameTimerExtension/wiki" class="icon" target="_blank"><img src="icons/About.png" id="about-btn" class="icon" /></a>
+        </header>
 
         <div class="video-data">
             <input type="text" id="framerate" placeholder="FRAMERATE" />
             <br />
             <label for="time-text">FRAME: </label>
-            <input type="text" id="time-text"  value="0.0" />
+            <input type="text" id="time-text" value="0.0" />
             <button id="exact-time-btn">Get Exact Time</button>
         </div>
 
@@ -22,18 +26,18 @@
             <button id="end-time-btn">Set Ending Time</button>
         </div>
 
-        <div id="instances-container">
-            <div class="instance">
-                <button id="time-instance-btn"> <div id="instance-value"> 00h 00m 00s 000ms </div> </button>
-                <button id="reset-btn" class="icon"><img src="icons/reset.png"></button>
-            </div>
-        </div>
+        <div id="instances-container"><div class="instance"><button id="time-instance-btn">
+                    <div id="instance-value">00h 00m 00s 000ms</div>
+                </button>
+                <button id="reset-btn" class="icon">
+                    <img src="icons/reset.png" /></button></div></div>
 
         <div>
-            <button id="add-btn" class="icon"><img src="icons/plus.png"></button>
+            <button id="add-btn" class="icon">
+                <img src="icons/plus.png" />
+            </button>
         </div>
 
-        <br />
 
         <div id="calculated-time-container">
             <label for="calculated-time">Calculated Time: </label>
@@ -44,18 +48,17 @@
                 disabled
             />
 
-            <br />
 
             <button id="calculate-btn">Calculate</button>
             <button id="copy-btn">Copy</button>
             <button id="reset-all-btn">Reset All</button>
         </div>
 
+        <br />
+
         <footer>
-            <p>
-                THIS EXTENSION WAS MADE BY: NIA & EVIL
-             </p>
-             <a href="https://www.google.com/" target="_blank">Buy me a ☕︎</a>
+            <p>THIS EXTENSION WAS MADE BY: NIA & EVIL</p>
+            <a href="https://www.google.com/" target="_blank">Buy me a ☕︎</a>
         </footer>
 
         <script src="scripts/popup.js"></script>

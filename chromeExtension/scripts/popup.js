@@ -68,6 +68,23 @@ function getSelectedInstance() {
     }
 }
 
+function getSelectedInstanceIndex() {
+    var instances = instancesContainer.querySelectorAll("#time-instance-btn");
+
+    for (var i = 0; i < instances.length; i++) {
+        var input = instances[i];
+
+        // Verificar si el radio input está seleccionado
+
+        if (input.getAttribute("checked") == "true") {
+            // Obtener el contenedor más cercano con la clase "contenedor"
+            
+
+            return i;
+        }
+    }
+}
+
 window.onload = getDataFromLocalStorage;
 
 function saveDataToLocalStorage() {
@@ -79,9 +96,17 @@ function getDataFromLocalStorage() {
         var obj = result.timeData;
 
         setData(obj);
+
+        var selected = result.timeData.selected;
+
+        console.log(instancesContainer.childNodes[selected].querySelector("#time-instance-btn"));
+
+        changeSelectedInstance( instancesContainer.childNodes[selected].querySelector("#time-instance-btn"));
     });
 
     setData(undefined);
+
+
 }
 
 function setData(timeData) {
@@ -91,7 +116,6 @@ function setData(timeData) {
 
     var segments = timeData.segments;
     var framerate = timeData.framerate;
-    console.log(framerate);
     var textTime = timeData.textTime;
 
     if (framerate == undefined) {
@@ -106,37 +130,26 @@ function setData(timeData) {
         return;
     }
 
-    segment = segments[0];
+    for (let i = 0; i < segments.length; i++) {
+        var segment = segments[i];
+        var childNode = instancesContainer.childNodes[i];
 
-    var objSegment = new Segment(segment.startTime);
-    objSegment.endTime = segment.endTime;
+        if (childNode == undefined) {
+            addInstance();
 
-    var contenedor = instancesContainer.children[0];
-
-    if (objSegment.startTime != null && objSegment.endTime != null) {
-        contenedor.querySelector("#instance-value").innerHTML =
-            objSegment.toString();
-        sleep(12);
-    }
-
-    contenedor.segment = objSegment;
-
-    for (let i = 1; i < segments.length; i++) {
-        const segment = segments[i];
-
-        var objSegment = new Segment(segment.startTime);
-        objSegment.endTime = segment.endTime;
-
-        addInstance();
-
-        var contenedor = instancesContainer.children[i];
-
-        if (objSegment.startTime != null && objSegment.endTime != null) {
-            contenedor.querySelector("#instance-value").innerHTML =
-                objSegment.toString();
+            childNode = instancesContainer.childNodes[i];
         }
 
-        contenedor.segment = objSegment;
+        childNode.segment = new Segment(segment.startTime);
+
+        if (segment.endTime == null) {
+            continue;
+        }
+
+        childNode.segment.endTime = segment.endTime;
+
+        childNode.querySelector("#instance-value").innerHTML =
+            childNode.segment.toString();
     }
 }
 
@@ -152,6 +165,7 @@ function changeSelectedInstance(timeInput) {
         });
 
     timeInput.setAttribute("checked", true);
+    saveDataToLocalStorage();
 }
 
 // ------------- Create JSON ----------------
@@ -167,6 +181,12 @@ function getAllSegments() {
         var segment = contenedor.segment;
 
         if (segment == null) {
+            var objSegment = {
+                startTime: null,
+                endTime: null,
+            };
+
+            obj.push(objSegment);
             continue;
         }
 
@@ -186,6 +206,7 @@ function createSaveJSON() {
     var framerate = document.querySelector("#framerate").value;
 
     var jsonObj = {
+        selected: getSelectedInstanceIndex(),
         framerate: framerate,
         segments: obj,
         textTime: timeText.value,
@@ -228,7 +249,6 @@ function addInstance() {
     // Crear los elementos para la nueva instancia
     var removeButton = document.createElement("button");
 
-
     var removeImg = document.createElement("img");
 
     removeImg.src = "icons/remove.png";
@@ -237,16 +257,14 @@ function addInstance() {
 
     removeButton.classList.add("icon");
 
-
     // Configurar los atributos y contenido de los elementos
-    var newChild = instancesContainer.childNodes[1].cloneNode(true);
+    var newChild = instancesContainer.childNodes[0].cloneNode(true);
 
     var resetBtn = newChild.querySelector("#reset-btn");
 
     resetBtn.addEventListener("click", () => {
         resetBtnFunc(resetBtn);
     });
-
 
     newChild.segment = undefined;
     newChild.querySelector("#instance-value").innerHTML = "00h 00m 00s 000ms";
@@ -301,6 +319,7 @@ copyBtn.addEventListener("click", () => {
 
 addBtn.addEventListener("click", () => {
     addInstance();
+    saveDataToLocalStorage();
 });
 
 resetAllBtn.addEventListener("click", () => {
@@ -345,7 +364,7 @@ getExactTimeBtn.addEventListener("click", () => {
 });
 
 startTimeBtn.addEventListener("click", () => {
-    if (timeText.value.trim() == "") {
+    if (timeText.value.trim() == "" || timeText.value == "0.0") {
         alert("You have not selected a second, hit 'Get exact time' first.");
         return;
     }
@@ -354,7 +373,7 @@ startTimeBtn.addEventListener("click", () => {
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
-        alert("No se ha seleccionado ninguna instancia seleccionada");
+        alert("No instance selected.");
         return;
     }
 
@@ -367,14 +386,14 @@ endTimerBtn.addEventListener("click", () => {
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
-        alert("No se ha seleccionado ninguna instancia seleccionada");
+        alert("No instance selected");
         return;
     }
 
     var segment = contenedor.segment;
 
-    if (segment == null) {
-        alert("La instancia seleccionada no tiene un tiempo de inicio");
+    if (segment == null || segment.startTime == null) {
+        alert("The selected instance does not have a start time");
         return;
     }
 
@@ -388,7 +407,6 @@ endTimerBtn.addEventListener("click", () => {
 timeInput.addEventListener("click", () => {
     changeSelectedInstance(timeInput);
 });
-
 
 framerateInput.addEventListener("change", () => {
     saveDataToLocalStorage();

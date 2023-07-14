@@ -6,12 +6,15 @@ const calculatedTimeText = document.querySelector("#calculated-time");
 const calculateBtn = document.querySelector("#calculate-btn");
 const addBtn = document.querySelector("#add-btn");
 const getExactTimeBtn = document.querySelector("#exact-time-btn");
-const startTimerBtn = document.querySelector("#start-time-btn");
+const startTimeBtn = document.querySelector("#start-time-btn");
 const endTimerBtn = document.querySelector("#end-time-btn");
 const resetBtn = document.querySelector("#reset-btn");
 const resetAllBtn = document.querySelector("#reset-all-btn");
+const copyBtn = document.querySelector("#copy-btn");
+const timeInput = document.querySelector("#time-instance-btn");
+const framerateInput = document.querySelector("#framerate");
 
-// ----------------- Funcionalidad básica -----------------
+// ----------------- Basic Funcionality -----------------
 
 function Segment(startTime) {
     this.startTime = startTime;
@@ -23,47 +26,66 @@ function Segment(startTime) {
         return this.calculateTime();
     };
     this.calculateTime = function () {
-        var seconds = this.getSeconds();
-        var hours = Math.floor(seconds / 3600);
-        var minutes = Math.floor((seconds % 3600) / 60);
-        var remainingSeconds = Math.floor(seconds % 60);
-        var milliseconds = Math.floor((seconds - Math.floor(seconds)) * 1000);
+        var segundos = Math.abs(this.getSeconds());
+        var horas = Math.floor(segundos / 3600);
+        var minutos = Math.floor((segundos % 3600) / 60);
+        var segundosRestantes = Math.floor(segundos % 60);
+        var milisegundos = Math.floor((segundos - Math.floor(segundos)) * 1000);
 
-        var formattedTime = "";
+        var tiempoFormateado = "";
 
-        formattedTime += hours.toString().padStart(2, "0") + "h ";
-        formattedTime += minutes.toString().padStart(2, "0") + "m ";
-        formattedTime +=
-            remainingSeconds.toString().padStart(2, "0") + "s ";
-        formattedTime += milliseconds.toString().padStart(3, "0") + "ms";
+        tiempoFormateado += horas.toString().padStart(2, "0") + "h ";
+        tiempoFormateado += minutos.toString().padStart(2, "0") + "m ";
+        tiempoFormateado +=
+            segundosRestantes.toString().padStart(2, "0") + "s ";
+        tiempoFormateado += milisegundos.toString().padStart(3, "0") + "ms";
 
-        return formattedTime;
+        return tiempoFormateado;
     };
 }
 
-function resetBtnFunc() {
-    resetBtn.parentNode.querySelector("#time-instance-text").value =
+function resetBtnFunc(resetBtn) {
+    resetBtn.parentNode.querySelector("#instance-value").innerHTML =
         "00h 00m 00s 000ms";
     resetBtn.parentNode.segment = undefined;
     saveDataToLocalStorage();
 }
 
 function getSelectedInstance() {
-    var radioInputs = document.querySelectorAll('input[type="radio"]');
+    var instances = instancesContainer.querySelectorAll("#time-instance-btn");
 
-    for (var i = 0; i < radioInputs.length; i++) {
-        var input = radioInputs[i];
+    for (var i = 0; i < instances.length; i++) {
+        var input = instances[i];
 
         // Verificar si el radio input está seleccionado
 
-        if (input.checked) {
+        if (input.getAttribute("checked") == "true") {
             // Obtener el contenedor más cercano con la clase "contenedor"
-            var container = input.closest(".instance");
+            var contenedor = input.closest(".instance");
 
-            return container;
+            return contenedor;
         }
     }
 }
+
+function getSelectedInstanceIndex() {
+    var instances = instancesContainer.querySelectorAll("#time-instance-btn");
+
+    for (var i = 0; i < instances.length; i++) {
+        var input = instances[i];
+
+        // Verificar si el radio input está seleccionado
+
+        if (input.getAttribute("checked") == "true") {
+            // Obtener el contenedor más cercano con la clase "contenedor"
+            
+
+            return i;
+        }
+    }
+}
+
+window.onload = getDataFromLocalStorage;
 
 function saveDataToLocalStorage() {
     browser.storage.local.set({ timeData: createSaveJSON() });
@@ -74,9 +96,18 @@ function getDataFromLocalStorage() {
         var obj = result.timeData;
 
         setData(obj);
+
+        var selected = result.timeData.selected;
+
+        console.log(selected);
+
+        console.log(instancesContainer.childNodes[selected]);
+        changeSelectedInstance( instancesContainer.childNodes[selected].querySelector("#time-instance-btn"));
     });
 
     setData(undefined);
+
+
 }
 
 function setData(timeData) {
@@ -85,7 +116,14 @@ function setData(timeData) {
     }
 
     var segments = timeData.segments;
+    var framerate = timeData.framerate;
     var textTime = timeData.textTime;
+
+    if (framerate == undefined) {
+        framerate = "";
+    }
+
+    document.querySelector("#framerate").value = framerate;
 
     timeText.value = textTime;
 
@@ -93,36 +131,26 @@ function setData(timeData) {
         return;
     }
 
-    segment = segments[0];
+    for (let i = 0; i < segments.length; i++) {
+        var segment = segments[i];
+        var childNode = instancesContainer.childNodes[i];
 
-    var objSegment = new Segment(segment.startTime);
-    objSegment.endTime = segment.endTime;
+        if (childNode == undefined) {
+            addInstance();
 
-    var container = instancesContainer.children[0];
-
-    if (objSegment.startTime != null && objSegment.endTime != null) {
-        container.querySelector("#time-instance-text").value =
-            objSegment.toString();
-    }
-
-    container.segment = objSegment;
-
-    for (let i = 1; i < segments.length; i++) {
-        const segment = segments[i];
-
-        var objSegment = new Segment(segment.startTime);
-        objSegment.endTime = segment.endTime;
-
-        addInstance();
-
-        var container = instancesContainer.children[i];
-
-        if (objSegment.startTime != null && objSegment.endTime != null) {
-            container.querySelector("#time-instance-text").value =
-                objSegment.toString();
+            childNode = instancesContainer.childNodes[i];
         }
 
-        container.segment = objSegment;
+        childNode.segment = new Segment(segment.startTime);
+
+        if (segment.endTime == null) {
+            continue;
+        }
+
+        childNode.segment.endTime = segment.endTime;
+
+        childNode.querySelector("#instance-value").innerHTML =
+            childNode.segment.toString();
     }
 }
 
@@ -130,19 +158,36 @@ function onLoad() {
     getDataFromLocalStorage();
 }
 
-// ------------- Crear JSON ----------------
+function changeSelectedInstance(timeInput) {
+    instancesContainer
+        .querySelectorAll("#time-instance-btn")
+        .forEach((button) => {
+            button.setAttribute("checked", false);
+        });
+
+    timeInput.setAttribute("checked", true);
+    saveDataToLocalStorage();
+}
+
+// ------------- Create JSON ----------------
 
 function getAllSegments() {
-    var containers = document.querySelectorAll(".instance");
+    var contenedores = document.querySelectorAll(".instance");
 
     var obj = [];
 
-    for (let i = 0; i < containers.length; i++) {
-        const container = containers[i];
+    for (let i = 0; i < contenedores.length; i++) {
+        const contenedor = contenedores[i];
 
-        var segment = container.segment;
+        var segment = contenedor.segment;
 
         if (segment == null) {
+            var objSegment = {
+                startTime: null,
+                endTime: null,
+            };
+
+            obj.push(objSegment);
             continue;
         }
 
@@ -159,8 +204,11 @@ function getAllSegments() {
 
 function createSaveJSON() {
     var obj = getAllSegments();
+    var framerate = document.querySelector("#framerate").value;
 
     var jsonObj = {
+        selected: getSelectedInstanceIndex(),
+        framerate: framerate,
         segments: obj,
         textTime: timeText.value,
     };
@@ -168,17 +216,17 @@ function createSaveJSON() {
     return jsonObj;
 }
 
-//----------------- Calcular tiempo -----------------
+//----------------- Calculate Time -----------------
 
 function calculateTotalTime() {
     var totalSeconds = 0;
 
-    var segments = document.querySelectorAll(".instance");
+    var segmets = document.querySelectorAll(".instance");
 
     var totalSegment = new Segment(0);
 
-    for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i].segment;
+    for (let i = 0; i < segmets.length; i++) {
+        const segment = segmets[i].segment;
         var seconds = segment.getSeconds();
 
         if (seconds == null || seconds == undefined || seconds < 0) {
@@ -196,81 +244,109 @@ calculateBtn.addEventListener("click", () => {
     calculatedTimeText.value = calculateTotalTime().toString();
 });
 
-// ----------------- Agregar instancia -----------------
+// ----------------- Add Instance -----------------
 
 function addInstance() {
     // Crear los elementos para la nueva instancia
-    var container = document.createElement("div");
-    var selectButton = document.createElement("input");
-    var timeInput = document.createElement("input");
     var removeButton = document.createElement("button");
-    var resetButton = document.createElement("button");
+
+    var removeImg = document.createElement("img");
+
+    removeImg.src = "icons/remove.png";
+
+    removeButton.appendChild(removeImg);
+
+    removeButton.classList.add("icon");
 
     // Configurar los atributos y contenido de los elementos
-    container.classList.add("instance");
+    var newChild = instancesContainer.childNodes[0].cloneNode(true);
 
-    selectButton.type = "radio";
-    selectButton.name = "select-instance";
-    selectButton.checked = true;
+    var resetBtn = newChild.querySelector("#reset-btn");
 
-    resetButton.textContent = "↻";
-    removeButton.textContent = "–";
-
-    timeInput.type = "text";
-    timeInput.id = "time-instance-text";
-    timeInput.placeholder = "00h 00m 00s 000ms";
-    timeInput.disabled = true;
-
-    removeButton.addEventListener("click", () => {
-        console.log("trying to remove");
-        if(container.querySelector("input").checked) {
-            container.previousElementSibling.querySelector("input").checked = true;
-        }
-        container.remove();
-        saveDataToLocalStorage();
+    resetBtn.addEventListener("click", () => {
+        resetBtnFunc(resetBtn);
     });
 
-    resetButton.addEventListener("click", () => {
-        timeInput.value = "00h 00m 00s 000ms";
-        resetButton.parentNode.segment = undefined;
+    newChild.segment = undefined;
+    newChild.querySelector("#instance-value").innerHTML = "00h 00m 00s 000ms";
+
+    //timeInput.type = "text";
+
+    newChild
+        .querySelector("#time-instance-btn")
+        .addEventListener("click", () => {
+            changeSelectedInstance(
+                newChild.querySelector("#time-instance-btn")
+            );
+        });
+
+    changeSelectedInstance(newChild.querySelector("#time-instance-btn"));
+
+    //timeInput.disabled = true;
+
+    removeButton.addEventListener("click", () => {
+        if (
+            newChild
+                .querySelector("#time-instance-btn")
+                .getAttribute("checked") == "true"
+        ) {
+            changeSelectedInstance(
+                newChild.previousElementSibling.querySelector(
+                    "#time-instance-btn"
+                )
+            );
+        }
+
+        newChild.remove();
         saveDataToLocalStorage();
     });
 
     // Agregar los elementos al contenedor principal
-    container.appendChild(selectButton);
-    container.appendChild(timeInput);
-    container.appendChild(resetButton);
-    container.appendChild(removeButton);
+    instancesContainer.appendChild(newChild);
+
+    newChild.appendChild(removeButton);
 
     // Obtener el contenedor de instancias y agregar la nueva instancia
-    var instancesContainer = document.getElementById("instances-container");
-    instancesContainer.appendChild(container);
 }
 
 // ----------------- Event Listeners -----------------
 
+copyBtn.addEventListener("click", () => {
+    var text = calculatedTimeText.value;
+    navigator.clipboard.writeText(text).then(function () {
+        alert("Copied to clipboard");
+    });
+});
+
 addBtn.addEventListener("click", () => {
     addInstance();
+    saveDataToLocalStorage();
 });
 
 resetAllBtn.addEventListener("click", () => {
-    var containers = document.querySelectorAll(".instance");
+    document.querySelector("#framerate").value = "";
+    var contenedores = document.querySelectorAll(".instance");
 
-    timeText.value = "";
+    timeText.value = "0.0";
 
-    for (let i = 1; i < containers.length; i++) {
-        const container = containers[i];
+    for (let i = 1; i < contenedores.length; i++) {
+        const contenedor = contenedores[i];
 
-        container.remove();
+        contenedor.remove();
     }
 
-    resetBtnFunc();
+    contenedores[0].segment = undefined;
+
+    contenedores[0].querySelector("#instance-value").innerHTML =
+        "00h 00m 00s 000ms";
+
+    changeSelectedInstance(document.querySelector("#time-instance-btn"));
 
     saveDataToLocalStorage();
 });
 
 resetBtn.addEventListener("click", () => {
-    resetBtnFunc();
+    resetBtnFunc(resetBtn);
 });
 
 getExactTimeBtn.addEventListener("click", () => {
@@ -281,49 +357,62 @@ getExactTimeBtn.addEventListener("click", () => {
         browser.tabs.sendMessage(
             activeTabId,
             { message: "getExactTime", videoId: 0 },
-            function (response) {
+            async function (response) {
                 timeText.value = response.time;
             }
         );
     });
 });
 
-startTimerBtn.addEventListener("click", () => {
-    if (timeText.value.trim() == "") {
-        alert("No has seleccionado un segundo, primero haz clic en 'Obtener tiempo exacto'.");
+startTimeBtn.addEventListener("click", () => {
+    if (timeText.value.trim() == "" || timeText.value == "0.0") {
+        alert("You have not selected a second, hit 'Get exact time' first.");
         return;
     }
     var segment = new Segment(timeText.value);
 
-    var container = getSelectedInstance();
+    var contenedor = getSelectedInstance();
 
-    if (container == null) {
-        alert("No se ha seleccionado ninguna instancia.");
+    if (contenedor == null) {
+        alert("No instance selected.");
         return;
     }
 
-    container.segment = segment;
+    contenedor.segment = segment;
 
     saveDataToLocalStorage();
 });
 
 endTimerBtn.addEventListener("click", () => {
-    var container = getSelectedInstance();
+    var contenedor = getSelectedInstance();
 
-    if (container == null) {
-        alert("No se ha seleccionado ninguna instancia.");
+    if (contenedor == null) {
+        alert("No instance selected");
         return;
     }
 
-    var segment = container.segment;
+    var segment = contenedor.segment;
 
-    if (segment == null) {
-        alert("La instancia seleccionada no tiene un tiempo de inicio.");
+    if (segment == null || segment.startTime == null) {
+        alert("The selected instance does not have a start time");
         return;
     }
 
     segment.endTime = timeText.value;
 
-    container.querySelector("#time-instance-text").value = segment.toString();
+    contenedor.querySelector("#instance-value").innerHTML =
+        contenedor.segment.toString();
     saveDataToLocalStorage();
 });
+
+timeInput.addEventListener("click", () => {
+    changeSelectedInstance(timeInput);
+});
+
+framerateInput.addEventListener("change", () => {
+    saveDataToLocalStorage();
+});
+
+// ----------------- Execute -----------------
+
+timeInput.setAttribute("checked", true);

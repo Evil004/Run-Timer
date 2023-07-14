@@ -1,4 +1,5 @@
-# Frame Timer Extension
+![Youtube Frame Timer Logo](./Youtube_Frame_Timer_Logo.png)
 
-This extension allows you to get the exact frame of a YouTube video, store it as the start, get a second frame, store it as the end and calculate the time between the two.
-It also allows you to add several segments and get the total time.
+# Youtube Frame Timer
+Youtube Frame Timer is a tool for moderators who need to retime Speedruns. This tool is optimized to readjust the timing in a simple and efficient manner.
+At this time, we provide a [Chrome Extension](Chromeextension) and a [Firefox Addon](firefoxaddon).
