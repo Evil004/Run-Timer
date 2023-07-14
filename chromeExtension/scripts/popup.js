@@ -51,14 +51,14 @@ function resetBtnFunc() {
 }
 
 function getSelectedInstance() {
-    var radioInputs = document.querySelectorAll('input[type="radio"]');
+    var instances = instancesContainer.querySelectorAll("#time-instance-btn");
 
     for (var i = 0; i < radioInputs.length; i++) {
         var input = radioInputs[i];
 
         // Verificar si el radio input está seleccionado
 
-        if (input.checked) {
+        if (input.getAttribute("checked") == "true") {
             // Obtener el contenedor más cercano con la clase "contenedor"
             var contenedor = input.closest(".instance");
 
@@ -135,14 +135,16 @@ function onLoad() {
 }
 
 function changeSelectedInstance(timeInput) {
+
+    console.log(timeInput);
+
     instancesContainer
         .querySelectorAll("#time-instance-btn")
         .forEach((button) => {
-            button.style.backgroundColor = "";
-            button.checked = false;
+            button.setAttribute("checked", false);
         });
-    timeInput.style.backgroundColor = "";
-    timeInput.checked = true;
+
+        timeInput.setAttribute("checked", true);
 }
 
 // ------------- Create JSON ----------------
@@ -218,34 +220,37 @@ function addInstance() {
     var removeButton = document.createElement("button");
 
     // Configurar los atributos y contenido de los elementos
-    var newChild = instancesContainer.childNodes[0];
+    var newChild = instancesContainer.childNodes[1].cloneNode(true);
 
     removeButton.textContent = "-";
 
     //timeInput.type = "text";
+
+    newChild.querySelector("#time-instance-btn").addEventListener("click", () => {
+        changeSelectedInstance(newChild.querySelector("#time-instance-btn"));
+    });
     
     
-    changeSelectedInstance(timeInput);
+    changeSelectedInstance(newChild.querySelector("#time-instance-btn"));
 
     //timeInput.disabled = true;
 
     removeButton.addEventListener("click", () => {
 
-        if (newChild.querySelector("#time-instance-btn").checked) {
+        if (newChild.querySelector("#time-instance-btn").getAttribute("checked") == "true") {
             changeSelectedInstance(newChild.previousElementSibling.querySelector("#time-instance-btn"));
         }
 
         newChild.remove();
-        saveDataToLocalStorage();
+        //saveDataToLocalStorage();
     });
 
     // Agregar los elementos al contenedor principal
+    instancesContainer.appendChild(newChild);
 
     newChild.appendChild(removeButton);
 
     // Obtener el contenedor de instancias y agregar la nueva instancia
-    var instancesContainer = document.getElementById("instances-container");
-    instancesContainer.appendChild(container);
 }
 
 // ----------------- Event Listeners -----------------
@@ -337,17 +342,9 @@ endTimerBtn.addEventListener("click", () => {
 });
 
 timeInput.addEventListener("click", () => {
-    instancesContainer
-        .querySelectorAll("#time-instance-btn")
-        .forEach((button) => {
-            button.style.backgroundColor = "";
-            timeInput.checked = false;
-        });
-    timeInput.style.backgroundColor = "";
-    timeInput.checked = true;
+    changeSelectedInstance(timeInput);
 });
 
 // ----------------- Execute -----------------
 
-timeInput.style.backgroundColor = "";
-timeInput.checked = true;
+timeInput.setAttribute("checked", true);

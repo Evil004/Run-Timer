@@ -67,3 +67,8 @@ input[type="text"] {
   background-color: #444444;
 
 }
+
+
+#time-instance-btn[checked="true"]{
+  background-color: #f0f;
+}
