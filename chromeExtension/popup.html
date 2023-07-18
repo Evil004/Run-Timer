@@ -6,7 +6,7 @@
         <title>Document</title>
         <link type="text/css" rel="stylesheet" href="style.css" />
     </head>
-    <body>
+    <>
         <header>
             <h1>Frame Timer</h1>
 
@@ -77,20 +77,27 @@
             <footer>
                 <p>
                     THIS EXTENSION WAS MADE BY: NIA <span id="amp">&</span> EVIL
-                    <a href="https://www.buymeacoffee.com/evil004" target="_blank"
-                        >Buy me a ☕︎</a
-                    >
                 </p>
+                <a href="https://www.buymeacoffee.com/evil004" target="_blank"
+                    >Buy me a ☕︎</a
+                >
             </footer>
         </div>
 
-        <div id="warning">
-            <p id="warning-text">
+        <div id="warning" class="warning-container">
+            <div class="title-container">
+                <img src="icons/warning.png" id="warning-icon" class="warning-icon"></img>
+                <h1 id="warning-title" class="warning-title">WARNING</h1>
+            </div>
+            <p id="warning-text" class="warning-text">
                 Are you sure you want to overwrite the time?
             </p>
             <button id="warning-yes-btn">Yes</button>
             <button id="warning-no-btn">No</button>
         </div>
+        
+
+        <div id="lock"></div>
 
         <div class="ErrorMessage">
             <p id="setTimeError"></p>

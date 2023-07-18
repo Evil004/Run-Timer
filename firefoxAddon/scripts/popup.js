@@ -42,7 +42,7 @@ function generateModNote() {
 
     if (framerate == 0) {
         document.querySelector("#setTimeError").innerHTML =
-            "Framerate can't be 0";
+            "Framerate cannot be 0";
         return;
     }
 
@@ -118,6 +118,31 @@ function Segment(startTime) {
 
         return tiempoFormateado;
     };
+}
+
+function resetAll() {
+    document.querySelector("#framerate").value = "";
+    var contenedores = document.querySelectorAll(".segment");
+
+    timeText.value = "0.0";
+
+    for (let i = 1; i < contenedores.length; i++) {
+        const contenedor = contenedores[i];
+
+        contenedor.remove();
+    }
+
+    contenedores[0].segment = undefined;
+
+    contenedores[0].querySelector("#segment-value").innerHTML =
+        "00h 00m 00s 000ms";
+
+    changeSelectedInstance(document.querySelector("#time-segment-btn"));
+
+    calculatedTimeText.value = "00h 00m 00s 000ms";
+    calculatedTimeText.segment = new Segment(0);
+
+    saveDataToLocalStorage();
 }
 
 function resetBtnFunc(resetBtn) {
@@ -292,9 +317,14 @@ function changeSelectedInstance(timeInput) {
 
 function openWarning(isStart, newTime, contenedor) {
     document.querySelector("#warning").style.visibility = "visible";
+    document.querySelector("#lock").style.visibility = "visible";
+
+    document.querySelector("#warning-text").innerHTML =
+        "Are you sure you want to overwrite the time?";
 
     let warningYes = document.querySelector("#warning-yes-btn");
     let warningNo = document.querySelector("#warning-no-btn");
+
 
     warningYes.addEventListener("click", () => {
         if (isStart) {
@@ -309,12 +339,41 @@ function openWarning(isStart, newTime, contenedor) {
         }
 
         document.querySelector("#warning").style.visibility = "hidden";
+        document.querySelector("#lock").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
     });
 
     warningNo.addEventListener("click", () => {
         document.querySelector("#warning").style.visibility = "hidden";
+        document.querySelector("#lock").style.visibility = "hidden";
+
+        warningNo.removeEventListener("click", () => {});
+    });
+}
+
+
+function openWarningResetAll() {
+    document.querySelector("#warning").style.visibility = "visible";
+    document.querySelector("#lock").style.visibility = "visible";
+
+    document.querySelector("#warning-text").innerHTML = "Are you sure you want to reset all the data?"
+
+    let warningYes = document.querySelector("#warning-yes-btn");
+    let warningNo = document.querySelector("#warning-no-btn");
+
+    warningYes.addEventListener("click", () => {
+        resetAll();
+
+        document.querySelector("#warning").style.visibility = "hidden";
+        document.querySelector("#lock").style.visibility = "hidden";
+
+        warningYes.removeEventListener("click", () => {});
+    });
+
+    warningNo.addEventListener("click", () => {
+        document.querySelector("#warning").style.visibility = "hidden";
+        document.querySelector("#lock").style.visibility = "hidden";
 
         warningNo.removeEventListener("click", () => {});
     });
@@ -490,28 +549,8 @@ addBtn.addEventListener("click", () => {
 
 resetAllBtn.addEventListener("click", () => {
     removeError();
-    document.querySelector("#framerate").value = "";
-    var contenedores = document.querySelectorAll(".segment");
 
-    timeText.value = "0.0";
-
-    for (let i = 1; i < contenedores.length; i++) {
-        const contenedor = contenedores[i];
-
-        contenedor.remove();
-    }
-
-    contenedores[0].segment = undefined;
-
-    contenedores[0].querySelector("#segment-value").innerHTML =
-        "00h 00m 00s 000ms";
-
-    changeSelectedInstance(document.querySelector("#time-segment-btn"));
-
-    calculatedTimeText.value = "00h 00m 00s 000ms";
-    calculatedTimeText.segment = new Segment(0);
-
-    saveDataToLocalStorage();
+    openWarningResetAll();
 });
 
 resetBtn.addEventListener("click", () => {
@@ -594,7 +633,6 @@ startTimeBtn.addEventListener("click", () => {
         contenedor.querySelector("#segment-value").innerHTML =
             contenedor.segment.toString();
     }
-
 
     saveDataToLocalStorage();
 });
