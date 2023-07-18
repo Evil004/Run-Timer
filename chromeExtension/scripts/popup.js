@@ -293,6 +293,11 @@ function openWarning(isStart, newTime, contenedor) {
             contenedor.segment.endTime = newTime;
         }
 
+        if (contenedor.segment.endTime != null) {
+            contenedor.querySelector("#segment-value").innerHTML =
+                contenedor.segment.toString();
+        }
+
         document.querySelector("#warning").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
@@ -559,12 +564,22 @@ startTimeBtn.addEventListener("click", () => {
         return;
     }
 
+
+
     if (contenedor.segment != undefined) {
+        if (contenedor.segment.startTime == timeText.value) {
+            return;
+        }
         openWarning(true, timeText.value, contenedor);
     } else {
         var segment = new Segment(timeText.value);
 
         contenedor.segment = segment;
+    }
+
+    if (contenedor.segment.endTime != null) {
+        contenedor.querySelector("#segment-value").innerHTML =
+            contenedor.segment.toString();
     }
 
     saveDataToLocalStorage();
@@ -589,6 +604,9 @@ endTimerBtn.addEventListener("click", () => {
     }
 
     if (segment.endTime != null) {
+        if (segment.endTime == timeText.value) {
+            return;
+        }
         openWarning(false, timeText.value, contenedor);
     } else {
         segment.endTime = timeText.value;
