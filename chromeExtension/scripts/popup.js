@@ -293,9 +293,6 @@ function openWarning(isStart, newTime, contenedor) {
             contenedor.segment.endTime = newTime;
         }
 
-        contenedor.querySelector("#segment-value").innerHTML =
-            contenedor.segment.toString();
-
         document.querySelector("#warning").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
@@ -555,6 +552,13 @@ startTimeBtn.addEventListener("click", () => {
         return;
     }
 
+    if (framerateInput.value <= 0 || framerateInput.value == "") {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate cannot be 0 or lower.";
+        framerateInput.value = "";
+        return;
+    }
+
     if (contenedor.segment != undefined) {
         openWarning(true, timeText.value, contenedor);
     } else {
@@ -562,9 +566,6 @@ startTimeBtn.addEventListener("click", () => {
 
         contenedor.segment = segment;
     }
-
-    contenedor.querySelector("#segment-value").innerHTML =
-        contenedor.segment.toString();
 
     saveDataToLocalStorage();
 });

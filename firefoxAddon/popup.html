@@ -9,70 +9,91 @@
     <body>
         <header>
             <h1>Frame Timer</h1>
-            
-            <a href="https://github.com/Evil004/FrameTimerExtension/wiki" class="icon" target="_blank"><img src="icons/About.png" id="about-btn" class="icon" /></a>
+
+            <a
+                href="https://github.com/Evil004/FrameTimerExtension/wiki"
+                class="icon"
+                target="_blank"
+                ><img src="icons/About.png" id="about-btn" class="icon"
+            /></a>
         </header>
 
         <div class="content">
-        <div class="video-data">
-            <input type="text" id="framerate" placeholder="FRAMERATE" />
-            <button id="sixty-framerate-btn">60</button>
-            <button id="thirty-framerate-btn">30</button>
+            <div class="video-data">
+                <input type="text" id="framerate" placeholder="FRAMERATE" />
+                <button id="sixty-framerate-btn">60</button>
+                <button id="thirty-framerate-btn">30</button>
 
-            <br />
-            <label for="time-text">FRAME: </label>
-            <input type="text" id="time-text" value="0.0" />
-            <button id="exact-time-btn">Get Frame</button>
-        </div>
+                <br />
+                <label for="time-text">FRAME: </label>
+                <input type="text" id="time-text" value="0.0" />
+                <button id="exact-time-btn">Get Frame</button>
+            </div>
 
-        <div class="buttonPane">
-            <button id="start-time-btn">Set Start Frame</button>
-            <button id="end-time-btn">Set Ending Frame</button>
-            
-        </div>
+            <div class="buttonPane">
+                <button id="start-time-btn">Set Start Frame</button>
+                <button id="end-time-btn">Set Ending Frame</button>
+            </div>
 
-        <div id="instances-container"><div class="instance"><button id="time-instance-btn">
-                    <div id="instance-value">00h 00m 00s 000ms</div>
+            <div id="segments-container"><div class="segment">
+                    <button id="time-segment-btn">
+                        <div id="segment-value">00h 00m 00s 000ms</div>
+                    </button>
+                    <button id="reset-btn" class="icon">
+                        <img src="icons/reset.png" />
+                    </button>
+                </div></div>
+
+            <div>
+                <button id="add-btn" class="icon">
+                    <img src="icons/plus.png" />
                 </button>
-                <button id="reset-btn" class="icon">
-                    <img src="icons/reset.png" /></button></div></div>
+            </div>
 
-        <div>
-            <button id="add-btn" class="icon">
-                <img src="icons/plus.png" />
-            </button> 
+            <div id="calculated-time-container">
+                <label for="calculated-time">Calculated Time: </label>
+                <input
+                    type="text"
+                    id="calculated-time"
+                    value="00h 00m 00s 000ms"
+                    disabled
+                />
+                <button id="copy-btn" class="icon">
+                    <img src="icons/clipboard.png" />
+                </button>
+                <button id="change-input-btn" class="icon">
+                    <img src="icons/swap.png" />
+                </button>
+                <button id="send-btn" class="icon">
+                    <img src="icons/transfer_icon.png" />
+                </button>
+
+                <button id="calculate-btn">Calculate</button>
+                <button id="copy-mod-note-btn">Mod Note</button>
+
+                <button id="reset-all-btn">Reset All</button>
+            </div>
+
+            <footer>
+                <p>
+                    THIS EXTENSION WAS MADE BY: NIA <span id="amp">&</span> EVIL
+                    <a href="https://www.buymeacoffee.com/evil004" target="_blank"
+                        >Buy me a ☕︎</a
+                    >
+                </p>
+            </footer>
         </div>
 
-
-        <div id="calculated-time-container">
-            <label for="calculated-time">Calculated Time: </label>
-            <input
-                type="text"
-                id="calculated-time"
-                value="00h 00m 00s 000ms"
-                disabled
-            />
-            <button id="copy-btn" class="icon"><img src="icons/clipboard.png"> </button>
-            <button id="change-input-btn" class="icon"><img src="icons/swap.png" /></button>
-            <button id="send-btn" class="icon"><img src="icons/transfer_icon.png"></button>
-
-            <button id="calculate-btn">Calculate</button>
-            <button id="copy-mod-note-btn">Mod Note</button>
-
-            <button id="reset-all-btn">Reset All</button>
-
+        <div id="warning">
+            <p id="warning-text">
+                Are you sure you want to overwrite the time?
+            </p>
+            <button id="warning-yes-btn">Yes</button>
+            <button id="warning-no-btn">No</button>
         </div>
 
-        <br />
-
-        <footer>
-            <p>THIS EXTENSION WAS MADE BY: NIA & EVIL</p>
-            <a href="https://www.google.com/" target="_blank">Buy me a ☕︎</a>
-        </footer>
-</div>
         <div class="ErrorMessage">
             <p id="setTimeError"></p>
-
         </div>
 
         <script src="scripts/popup.js"></script>
