@@ -13,12 +13,52 @@ const resetAllBtn = document.querySelector("#reset-all-btn");
 const copyBtn = document.querySelector("#copy-btn");
 const timeInput = document.querySelector("#time-instance-btn");
 const framerateInput = document.querySelector("#framerate");
+const sendBtn = document.querySelector("#send-btn");
+const changeInput = document.querySelector("#change-input-btn");
+const setFramerateTo60 = document.querySelector("#sixty-framerate-btn");
+const setFramerateTo30 = document.querySelector("#thirty-framerate-btn");
+const modNoteBtn = document.querySelector("#copy-mod-note-btn");
+
+
 
 // ----------------- Basic Funcionality -----------------
+
+function generateModNote() {
+
+    var modNote = 'Mod Message: The sections, "';
+
+    for (let i = 0; i < instancesContainer.childNodes.length; i++) {
+        let segment = instancesContainer.childNodes[i].segment;
+
+        if (segment == undefined) {
+            continue;
+        }
+
+        modNote += segment.toString();
+
+        if (i != instancesContainer.childNodes.length - 1) {
+            modNote += " + ";
+        }
+    }
+
+    modNote += ' at ' + framerateInput.value + ' fps"';
+    modNote += ' add up to a final time of "' + calculatedTimeText.value + '"';
+    modNote += '\nRetimed using the Retimer Chrome Extension (https://github.com/Evil004/FrameTimerExtension)';
+
+    return modNote;
+}
+
+function Time(hours, minutes, seconds, milliseconds) {
+    this.hours = hours;
+    this.minutes = minutes;
+    this.seconds = seconds;
+    this.milliseconds = milliseconds;
+}
 
 function Segment(startTime) {
     this.startTime = startTime;
     this.endTime = null;
+    this.time = new Time(0, 0, 0, 0);
     this.getSeconds = function () {
         return this.endTime - this.startTime;
     };
@@ -26,11 +66,23 @@ function Segment(startTime) {
         return this.calculateTime();
     };
     this.calculateTime = function () {
-        var segundos = Math.abs(this.getSeconds());
-        var horas = Math.floor(segundos / 3600);
-        var minutos = Math.floor((segundos % 3600) / 60);
-        var segundosRestantes = Math.floor(segundos % 60);
-        var milisegundos = Math.floor((segundos - Math.floor(segundos)) * 1000);
+        var framerate = framerateInput.value;
+
+        if (framerate == "" || framerate == undefined || framerate == null) {
+            framerate = 60;
+        }
+
+        var frames = Math.abs(this.getSeconds()) * framerate;
+        var horas = Math.floor(frames / (3600 * framerate));
+        var minutos = Math.floor(
+            (frames % (3600 * framerate)) / (60 * framerate)
+        );
+        var segundosRestantes = Math.floor(
+            (frames % (60 * framerate)) / framerate
+        );
+        var milisegundos = Math.floor(
+            (frames % framerate) * (1000 / framerate)
+        );
 
         var tiempoFormateado = "";
 
@@ -39,6 +91,8 @@ function Segment(startTime) {
         tiempoFormateado +=
             segundosRestantes.toString().padStart(2, "0") + "s ";
         tiempoFormateado += milisegundos.toString().padStart(3, "0") + "ms";
+
+        this.time = new Time(horas, minutos, segundosRestantes, milisegundos);
 
         return tiempoFormateado;
     };
@@ -78,14 +132,53 @@ function getSelectedInstanceIndex() {
 
         if (input.getAttribute("checked") == "true") {
             // Obtener el contenedor más cercano con la clase "contenedor"
-            
 
             return i;
         }
     }
 }
 
-window.onload = getDataFromLocalStorage;
+window.onload = onLoad;
+
+
+function onLoad() {
+
+
+
+    calculatedTimeText.segment = new Segment(0);
+
+
+    getDataFromLocalStorage();
+    unselectAll()
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var activeTabId = activeTab.id;
+
+        chrome.tabs.sendMessage(
+            activeTabId,
+            { message: "openedExtension" },
+            async function (response) {}
+        );
+    });
+}
+
+function unselectAll() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var activeTabId = activeTab.id;
+
+        chrome.tabs.sendMessage(
+            activeTabId,
+            { message: "unselect" },
+            async function (response) {}
+        );
+    });
+}
+
+function removeError() {
+    document.querySelector("#setTimeError").innerHTML = "";
+    document.querySelector("#setTimeError").style.color = "red";
+}
 
 function saveDataToLocalStorage() {
     chrome.storage.local.set({ timeData: createSaveJSON() });
@@ -99,14 +192,14 @@ function getDataFromLocalStorage() {
 
         var selected = result.timeData.selected;
 
-        console.log(instancesContainer.childNodes[selected].querySelector("#time-instance-btn"));
-
-        changeSelectedInstance( instancesContainer.childNodes[selected].querySelector("#time-instance-btn"));
+        changeSelectedInstance(
+            instancesContainer.childNodes[selected].querySelector(
+                "#time-instance-btn"
+            )
+        );
     });
 
     setData(undefined);
-
-
 }
 
 function setData(timeData) {
@@ -151,10 +244,6 @@ function setData(timeData) {
         childNode.querySelector("#instance-value").innerHTML =
             childNode.segment.toString();
     }
-}
-
-function onLoad() {
-    getDataFromLocalStorage();
 }
 
 function changeSelectedInstance(timeInput) {
@@ -236,6 +325,9 @@ function calculateTotalTime() {
     }
 
     totalSegment.endTime = totalSeconds;
+
+    calculatedTimeText.segment = totalSegment;
+
     return totalSegment;
 }
 
@@ -311,18 +403,23 @@ function addInstance() {
 // ----------------- Event Listeners -----------------
 
 copyBtn.addEventListener("click", () => {
+    removeError();
     var text = calculatedTimeText.value;
     navigator.clipboard.writeText(text).then(function () {
-        alert("Copied to clipboard");
+        document.querySelector("#setTimeError").innerHTML =
+            "Copied to clipboard";
+        document.querySelector("#setTimeError").style.color = "green";
     });
 });
 
 addBtn.addEventListener("click", () => {
+    removeError();
     addInstance();
     saveDataToLocalStorage();
 });
 
 resetAllBtn.addEventListener("click", () => {
+    removeError();
     document.querySelector("#framerate").value = "";
     var contenedores = document.querySelectorAll(".instance");
 
@@ -345,10 +442,12 @@ resetAllBtn.addEventListener("click", () => {
 });
 
 resetBtn.addEventListener("click", () => {
+    removeError();
     resetBtnFunc(resetBtn);
 });
 
 getExactTimeBtn.addEventListener("click", () => {
+    removeError();
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var activeTab = tabs[0];
         var activeTabId = activeTab.id;
@@ -363,9 +462,33 @@ getExactTimeBtn.addEventListener("click", () => {
     });
 });
 
+sendBtn.addEventListener("click", () => {
+    removeError();
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var activeTabId = activeTab.id;
+
+        var calculatedTime = calculatedTimeText.segment;
+
+        var time = calculatedTime.time;
+
+        chrome.tabs.sendMessage(
+            activeTabId,
+            { message: "setTime", time: time },
+            async function (response) {
+                console.log(response.message);
+            }
+        );
+    });
+});
+
 startTimeBtn.addEventListener("click", () => {
+    removeError();
+
     if (timeText.value.trim() == "" || timeText.value == "0.0") {
-        alert("You have not selected a second, hit 'Get exact time' first.");
+        document.querySelector("#setTimeError").innerHTML =
+            "You have not selected a second.";
+
         return;
     }
     var segment = new Segment(timeText.value);
@@ -373,27 +496,33 @@ startTimeBtn.addEventListener("click", () => {
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
-        alert("No instance selected.");
+        document.querySelector("#setTimeError").innerHTML =
+            "No instance selected.";
         return;
     }
 
     contenedor.segment = segment;
+    
+    
 
     saveDataToLocalStorage();
 });
 
 endTimerBtn.addEventListener("click", () => {
+    removeError();
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
-        alert("No instance selected");
+        document.querySelector("#setTimeError").innerHTML =
+            "No instance selected";
         return;
     }
 
     var segment = contenedor.segment;
 
     if (segment == null || segment.startTime == null) {
-        alert("The selected instance does not have a start time");
+        document.querySelector("#setTimeError").innerHTML =
+            "The selected instance does not have a start time";
         return;
     }
 
@@ -401,7 +530,25 @@ endTimerBtn.addEventListener("click", () => {
 
     contenedor.querySelector("#instance-value").innerHTML =
         contenedor.segment.toString();
+
+        maxFrame= (maxFrame<segment.endTime)?segment.endTime:maxFrame;
+
+        minFrame= (minFrame>segment.startTime)?segment.startTime:minFrame;
+
     saveDataToLocalStorage();
+});
+
+changeInput.addEventListener("click", () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var activeTabId = activeTab.id;
+
+        chrome.tabs.sendMessage(
+            activeTabId,
+            { message: "changeSelectedInput" },
+            async function (response) {}
+        );
+    });
 });
 
 timeInput.addEventListener("click", () => {
@@ -412,6 +559,31 @@ framerateInput.addEventListener("change", () => {
     saveDataToLocalStorage();
 });
 
+setFramerateTo30.addEventListener("click", () => {
+    framerateInput.value = 30;
+    saveDataToLocalStorage();
+});
+
+setFramerateTo60.addEventListener("click", () => {
+    framerateInput.value = 60;
+    saveDataToLocalStorage();
+});
+
+modNoteBtn.addEventListener("click", () => {
+    removeError();
+    var modNote = generateModNote();
+
+    navigator.clipboard.writeText(modNote).then(function () {
+        document.querySelector("#setTimeError").innerHTML =
+            "Copied to clipboard";
+        document.querySelector("#setTimeError").style.color = "green";
+    });
+});
+
+
 // ----------------- Execute -----------------
 
 timeInput.setAttribute("checked", true);
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}

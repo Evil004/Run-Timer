@@ -13,17 +13,22 @@
             <a href="https://github.com/Evil004/FrameTimerExtension/wiki" class="icon" target="_blank"><img src="icons/About.png" id="about-btn" class="icon" /></a>
         </header>
 
+        <div class="content">
         <div class="video-data">
             <input type="text" id="framerate" placeholder="FRAMERATE" />
+            <button id="sixty-framerate-btn">60</button>
+            <button id="thirty-framerate-btn">30</button>
+
             <br />
             <label for="time-text">FRAME: </label>
             <input type="text" id="time-text" value="0.0" />
-            <button id="exact-time-btn">Get Exact Time</button>
+            <button id="exact-time-btn">Get Frame</button>
         </div>
 
         <div class="buttonPane">
-            <button id="start-time-btn">Set Start Time</button>
-            <button id="end-time-btn">Set Ending Time</button>
+            <button id="start-time-btn">Set Start Frame</button>
+            <button id="end-time-btn">Set Ending Frame</button>
+            
         </div>
 
         <div id="instances-container"><div class="instance"><button id="time-instance-btn">
@@ -35,7 +40,7 @@
         <div>
             <button id="add-btn" class="icon">
                 <img src="icons/plus.png" />
-            </button>
+            </button> 
         </div>
 
 
@@ -47,11 +52,15 @@
                 value="00h 00m 00s 000ms"
                 disabled
             />
-
+            <button id="copy-btn" class="icon"><img src="icons/clipboard.png"> </button>
+            <button id="change-input-btn" class="icon"><img src="icons/swap.png" /></button>
+            <button id="send-btn" class="icon"><img src="icons/transfer_icon.png"></button>
 
             <button id="calculate-btn">Calculate</button>
-            <button id="copy-btn">Copy</button>
+            <button id="copy-mod-note-btn">Mod Note</button>
+
             <button id="reset-all-btn">Reset All</button>
+
         </div>
 
         <br />
@@ -60,6 +69,11 @@
             <p>THIS EXTENSION WAS MADE BY: NIA & EVIL</p>
             <a href="https://www.google.com/" target="_blank">Buy me a ☕︎</a>
         </footer>
+</div>
+        <div class="ErrorMessage">
+            <p id="setTimeError"></p>
+
+        </div>
 
         <script src="scripts/popup.js"></script>
     </body>

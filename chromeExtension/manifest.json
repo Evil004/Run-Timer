@@ -13,7 +13,13 @@
     "content_scripts": [
         {
             "matches": ["https://www.youtube.com/*", "https://youtu.be/*"],
-            "js": ["scripts/inject.js"],
+            "js": ["scripts/injectYT.js"],
+
+            "all_frames": true
+        },
+        {
+            "matches": ["https://www.speedrun.com/*"],
+            "js": ["scripts/injectSRC.js"],
 
             "all_frames": true
         }
