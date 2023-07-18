@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "FrameTimer",
+    "name": "Youtube Run-Timer",
     "version": "1.0",
-    "description": "A simple extension to time frames in a video.",
+    "description": "A Efficient Tool used for retiming.",
     "icons": {
         "128": "icon128.png"
     },
