@@ -18,6 +18,7 @@ const changeInput = document.querySelector("#change-input-btn");
 const setFramerateTo60 = document.querySelector("#sixty-framerate-btn");
 const setFramerateTo30 = document.querySelector("#thirty-framerate-btn");
 const modNoteBtn = document.querySelector("#copy-mod-note-btn");
+const lock = document.querySelector("#lock");
 
 // ----------------- Basic Funcionality -----------------
 
@@ -309,7 +310,8 @@ function openWarning(isStart, newTime, contenedor) {
     document.querySelector("#warning").style.visibility = "visible";
     document.querySelector("#lock").style.visibility = "visible";
 
-    document.querySelector("#warning-text").innerHTML = "Are you sure you want to overwrite the time?"
+    document.querySelector("#warning-text").innerHTML =
+        "Are you sure you want to overwrite the time?";
 
     let warningYes = document.querySelector("#warning-yes-btn");
     let warningNo = document.querySelector("#warning-no-btn");
@@ -344,7 +346,8 @@ function openWarningResetAll() {
     document.querySelector("#warning").style.visibility = "visible";
     document.querySelector("#lock").style.visibility = "visible";
 
-    document.querySelector("#warning-text").innerHTML = "Are you sure you want to reset all the data?"
+    document.querySelector("#warning-text").innerHTML =
+        "Are you sure you want to reset all the data?";
 
     let warningYes = document.querySelector("#warning-yes-btn");
     let warningNo = document.querySelector("#warning-no-btn");
@@ -706,6 +709,14 @@ modNoteBtn.addEventListener("click", () => {
     });
 });
 
+lock.addEventListener("click", () => {
+    removeError();
+
+    document.querySelector("#warning").style.visibility = "hidden";
+    document.querySelector("#lock").style.visibility = "hidden";
+
+    warningYes.removeEventListener("click", () => {});
+});
 // ----------------- Execute -----------------
 
 timeInput.setAttribute("checked", true);

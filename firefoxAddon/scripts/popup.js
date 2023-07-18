@@ -18,6 +18,8 @@ const changeInput = document.querySelector("#change-input-btn");
 const setFramerateTo60 = document.querySelector("#sixty-framerate-btn");
 const setFramerateTo30 = document.querySelector("#thirty-framerate-btn");
 const modNoteBtn = document.querySelector("#copy-mod-note-btn");
+const lock = document.querySelector("#lock");
+
 
 // ----------------- Basic Funcionality -----------------
 
@@ -722,6 +724,15 @@ modNoteBtn.addEventListener("click", () => {
             "Copied to clipboard";
         document.querySelector("#setTimeError").style.color = "green";
     });
+});
+
+lock.addEventListener("click", () => {
+    removeError();
+
+    document.querySelector("#warning").style.visibility = "hidden";
+    document.querySelector("#lock").style.visibility = "hidden";
+
+    warningYes.removeEventListener("click", () => {});
 });
 
 // ----------------- Execute -----------------

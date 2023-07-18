@@ -33,6 +33,7 @@ button {
 
     padding: 7px;
     border-radius: 5px;
+
 }
 
 button:hover {
@@ -237,7 +238,9 @@ footer > * {
     border-bottom-right-radius: 10px;
 }
 
-
+#warning[style="visibility: hidden;"]{
+    animation: top-botI 250ms ease-in-out;
+}
 
 #warning[style="visibility: visible;"] {
     animation: top-bot 500ms ease-in-out;
@@ -249,6 +252,18 @@ footer > * {
     }
     100% {
         transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes top-botI {
+    0% {
+        visibility:visible;
+        transform: translate(-50%, -50%);
+    }
+    100%
+    {
+        transform: translate(-50%, -150%);
+        visibility:hidden;
     }
 }
 
@@ -269,12 +284,27 @@ footer > * {
     animation: opacity-up 500ms ease-in-out;
 }
 
+#lock[style="visibility: hidden;"] {
+    animation: opacity-down 250ms ease-in-out;
+}
+
 @keyframes opacity-up {
     0% {
         opacity: 0;
     }
     100% {
         opacity: 1;
+    }
+}
+
+@keyframes opacity-down {
+    0% {
+        visibility: visible;
+        opacity: 1;
+    }
+    100% {
+        visibility: hidden;
+        opacity: 0; 
     }
 }
 
@@ -294,7 +324,11 @@ footer > * {
 
 .warning-title {
     text-align: center;
+    font-weight: normal;
+    font-size: 28px;
     margin: 0;
+    color: #fee5c7;
+
 }
 
 .warning-text {
@@ -307,10 +341,30 @@ footer > * {
 }
 
 #warning-yes-btn {
-    background-color: rgb(255, 165, 0);
+    background-color: #fee5c7;
     color: #0f0f0f;
 }
 
 #warning-yes-btn:hover {
-    background-color: rgb(255, 165, 0);
+    background-color: #e9c79e;
 }
+
+
+/*
+                                             *@@                  @@/           
+                                           @@@@@@@%            (@@@@@@@         
+                                        %@@@@*  @@%          @@@@@  *@@         
+                                      @@@@@     @@@@@     &@@@@,    *@@         
+                                   @@@@@     *@@@@@@@@@@@@@@@@@@@@  *@@         
+                              @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         
+                           *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         
+                         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         
+                         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         
+         .@@@@@@@@@@@@.  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%      
+       @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%      
+       @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@       .@@@@@@@@@@       *@@@@%      
+       @@@@@@@&       (@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%      
+                              @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         
+                                   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@/           
+                                                                       
+*/
