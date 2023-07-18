@@ -55,7 +55,7 @@ function generateModNote() {
     modNote += " at " + framerate + ' fps"';
     modNote += ' add up to a final time of "' + calculatedTimeText.value + '"';
     modNote +=
-        "\nRetimed using the Retimer Chrome Extension (https://github.com/Evil004/FrameTimerExtension)";
+        "\nRetimed using the Retimer Firefox Addon (https://github.com/Evil004/FrameTimerExtension)";
 
     return modNote;
 }
@@ -227,6 +227,8 @@ function removeError() {
 function saveDataToLocalStorage() {
     const saveData = createSaveJSON();
 
+    console.log(saveData);
+
     browser.storage.local
         .set({ savedTimeData: saveData })
         .then(function () {
@@ -239,6 +241,7 @@ function saveDataToLocalStorage() {
 
 function getDataFromLocalStorage() {
     browser.storage.local.get("savedTimeData").then(function (result) {
+
         console.log(result);
         var obj = result.savedTimeData;
 
@@ -344,6 +347,7 @@ function openWarning(isStart, newTime, contenedor) {
         document.querySelector("#lock").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
+        saveDataToLocalStorage();
     });
 
     warningNo.addEventListener("click", () => {
@@ -371,6 +375,8 @@ function openWarningResetAll() {
         document.querySelector("#lock").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
+        saveDataToLocalStorage();
+
     });
 
     warningNo.addEventListener("click", () => {
@@ -418,6 +424,10 @@ function createSaveJSON() {
     var obj = getAllSegments();
     var framerate = document.querySelector("#framerate").value;
 
+    if (isNaN(framerate)) {
+        framerate = "";
+    }
+
     let calculatedSegment = {
         startTime: calculatedTimeText.segment.startTime,
         endTime: calculatedTimeText.segment.endTime,
@@ -464,6 +474,12 @@ function calculateTotalTime() {
 }
 
 calculateBtn.addEventListener("click", () => {
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
     calculatedTimeText.value = calculateTotalTime().toString();
     saveDataToLocalStorage();
 });
@@ -574,6 +590,7 @@ getExactTimeBtn.addEventListener("click", () => {
             }
         );
     });
+    saveDataToLocalStorage();
 });
 
 sendBtn.addEventListener("click", () => {
@@ -614,10 +631,25 @@ startTimeBtn.addEventListener("click", () => {
         return;
     }
 
+    // check if framerate is a number
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
+
     if (framerateInput.value <= 0 || framerateInput.value == "") {
         document.querySelector("#setTimeError").innerHTML =
             "The framerate cannot be 0 or lower.";
         framerateInput.value = "";
+        return;
+    }
+
+    if (isNaN(timeText.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The time must be a number.";
+        timeText.value = "0.0";
         return;
     }
 
@@ -651,9 +683,30 @@ endTimerBtn.addEventListener("click", () => {
 
     var segment = contenedor.segment;
 
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
+
+    if (framerateInput.value <= 0 || framerateInput.value == "") {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate cannot be 0 or lower.";
+        framerateInput.value = "";
+        return;
+    }
+
     if (segment == null || segment.startTime == null) {
         document.querySelector("#setTimeError").innerHTML =
             "The selected segment does not have a start time";
+        return;
+    }
+
+    if (isNaN(timeText.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The time must be a number.";
+        timeText.value = "0.0";
         return;
     }
 

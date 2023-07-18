@@ -43,7 +43,7 @@ function generateModNote() {
 
     if (framerate == 0) {
         document.querySelector("#setTimeError").innerHTML =
-            "Framerate cannot be 0";
+            "Framerate cannot be 0 or empty";
         return;
     }
 
@@ -332,6 +332,7 @@ function openWarning(isStart, newTime, contenedor) {
         document.querySelector("#lock").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
+        saveDataToLocalStorage();
     });
 
     warningNo.addEventListener("click", () => {
@@ -359,6 +360,7 @@ function openWarningResetAll() {
         document.querySelector("#lock").style.visibility = "hidden";
 
         warningYes.removeEventListener("click", () => {});
+        saveDataToLocalStorage();
     });
 
     warningNo.addEventListener("click", () => {
@@ -406,6 +408,10 @@ function createSaveJSON() {
     var obj = getAllSegments();
     var framerate = document.querySelector("#framerate").value;
 
+    if (isNaN(framerate)) {
+        framerate = "";
+    }
+
     var jsonObj = {
         selected: getSelectedInstanceIndex(),
         framerate: framerate,
@@ -422,12 +428,16 @@ function createSaveJSON() {
 function calculateTotalTime() {
     var totalSeconds = 0;
 
-    var segmets = document.querySelectorAll(".segment");
+    var segments = document.querySelectorAll(".segment");
 
     var totalSegment = new Segment(0);
 
-    for (let i = 0; i < segmets.length; i++) {
-        let segment = segmets[i].segment;
+    for (let i = 0; i < segments.length; i++) {
+        let segment = segments[i].segment;
+
+        if (segment == undefined) {
+            continue;
+        }
 
         var seconds = segment.getSeconds();
 
@@ -446,6 +456,12 @@ function calculateTotalTime() {
 }
 
 calculateBtn.addEventListener("click", () => {
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
     calculatedTimeText.value = calculateTotalTime().toString();
     saveDataToLocalStorage();
 });
@@ -556,6 +572,7 @@ getExactTimeBtn.addEventListener("click", () => {
             }
         );
     });
+    saveDataToLocalStorage();
 });
 
 sendBtn.addEventListener("click", () => {
@@ -596,10 +613,24 @@ startTimeBtn.addEventListener("click", () => {
         return;
     }
 
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
+
     if (framerateInput.value <= 0 || framerateInput.value == "") {
         document.querySelector("#setTimeError").innerHTML =
             "The framerate cannot be 0 or lower.";
         framerateInput.value = "";
+        return;
+    }
+
+    if (isNaN(timeText.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The time must be a number.";
+        timeText.value = "0.0";
         return;
     }
 
@@ -633,10 +664,30 @@ endTimerBtn.addEventListener("click", () => {
     }
 
     var segment = contenedor.segment;
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
+
+    if (framerateInput.value <= 0 || framerateInput.value == "") {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate cannot be 0 or lower.";
+        framerateInput.value = "";
+        return;
+    }
 
     if (segment == null || segment.startTime == null) {
         document.querySelector("#setTimeError").innerHTML =
             "The selected segment does not have a start time";
+        return;
+    }
+
+    if (isNaN(timeText.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The time must be a number.";
+        timeText.value = "0.0";
         return;
     }
 
@@ -696,6 +747,14 @@ setFramerateTo60.addEventListener("click", () => {
 
 modNoteBtn.addEventListener("click", () => {
     removeError();
+
+    if (isNaN(framerateInput.value)) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate must be a number.";
+        framerateInput.value = "";
+        return;
+    }
+
     var modNote = generateModNote();
 
     if (modNote == undefined) {

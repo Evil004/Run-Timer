@@ -58,6 +58,10 @@ header {
     align-items: center;
 }
 
+#about-btn{
+    padding: 0px;
+}
+
 h1 {
     margin-right: auto;
 }
@@ -121,7 +125,7 @@ input[type="text"] {
 }
 
 .content {
-    padding-bottom: 10px;
+    padding-bottom: 30px;
 }
 
 .ErrorMessage {
@@ -212,7 +216,7 @@ footer > * {
 
 #warning {
     margin: 0px;
-    position: absolute;
+    position: fixed;
     top: 15%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -273,9 +277,11 @@ footer > * {
 
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
+
+    margin: 0;
 
     background-color: hwb(0 0% 100% / 0.65);
 }

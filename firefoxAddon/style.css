@@ -23,6 +23,10 @@ label {
     font-size: 20px;
 }
 
+#about-btn{
+    padding: 0px;
+}
+
 button {
     background: none;
     border: none;
@@ -42,7 +46,7 @@ button:hover {
 
 body {
     margin: 0px;
-    width: 425px;
+    width: 430px;
     height: 550px;
     background-color: #0f0f0f;
     color: #f2f2f2;
@@ -121,7 +125,7 @@ input[type="text"] {
 }
 
 .content {
-    padding-bottom: 10px;
+    padding-bottom: 30px;
 }
 
 .ErrorMessage {
@@ -212,11 +216,11 @@ footer > * {
 
 #warning {
     margin: 0px;
-    position: absolute;
+    position: fixed;
     top: 15%;
-    left: 50%;
+    left: 49.8%;
     transform: translate(-50%, -50%);
-    width: 426px;
+    width: 431px;
     height: 30%;
     color: #fafafa;
     background-color: #0f0f0f;
@@ -237,6 +241,7 @@ footer > * {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
 }
+
 
 #warning[style="visibility: hidden;"]{
     animation: top-botI 250ms ease-in-out;
@@ -273,9 +278,11 @@ footer > * {
 
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
+
+    margin: 0;
 
     background-color: hwb(0 0% 100% / 0.65);
 }
