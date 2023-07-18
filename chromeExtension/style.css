@@ -1,6 +1,13 @@
 @font-face {
-    font-family: helsinki;
+    font-family: helsinkiOrig;
     src: url(helsinki.ttf);
+}
+
+@font-face {
+    font-family: 'Helsinki';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Helsinki'), url('https://fonts.cdnfonts.com/s/192/helsinki.woff') format('woff');
 }
 
 html {
@@ -20,7 +27,7 @@ button {
     border: none;
     color: #fafafa;
 
-    font-family: helsinki;
+    font-family: helsinkiOrig;
     font-size: 20px;
 
     padding: 7px;
@@ -34,10 +41,10 @@ button:hover {
 body {
     margin: 0px;
     width: 425px;
-    font-family: Hels;
+    height: 550px;
     background-color: #0f0f0f;
     color: #f2f2f2;
-    font-family: helsinki;
+    font-family: helsinkiOrig;
 
     margin-bottom: 4px;
 
@@ -62,9 +69,13 @@ input[type="text"] {
     color: #f2f2f2;
     border: 0;
     font-size: 20px;
-    font-family: helsinki;
+    font-family: helsinkiOrig;
     border-radius: 5px;
     padding: 7px;
+}
+
+#amp{
+    font-family: Helsinki;
 }
 
 #framerate {
@@ -76,7 +87,7 @@ input[type="text"] {
     color: #fafafa;
 }
 
-#time-instance-btn {
+#time-segment-btn {
     width: 220px;
     padding: 2px;
     vertical-align: middle;
@@ -84,25 +95,25 @@ input[type="text"] {
     background-color: #272727;
 }
 
-#time-instance-btn:hover > div {
+#time-segment-btn:hover > div {
     background-color: #303030;
 }
 
-#time-instance-btn:hover {
+#time-segment-btn:hover {
     padding: 2px;
 
     background-color: #444444;
 }
 
-#time-instance-btn[checked="true"] {
+#time-segment-btn[checked="true"] {
     background-color: #838383;
 }
 
-#time-instance-btn:active {
+#time-segment-btn:active {
     background-color: #484848;
 }
 
-#time-instance-btn:active > div {
+#time-segment-btn:active > div {
     background-color: #484848;
 }
 
@@ -191,5 +202,26 @@ a:visited {
 
 footer {
     margin-bottom: 15px;
+    display: inline;
 }
 
+footer > *{
+    font-size: 18px;
+}
+
+#warning {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 0, 0, 0.7);
+    width: 300px;
+    color: #fff;
+    padding: 20px;
+    z-index: 10;
+
+    text-align: center;
+
+    visibility: hidden;
+
+}

@@ -1,5 +1,5 @@
 const timeText = document.querySelector("#time-text");
-const instancesContainer = document.querySelector("#instances-container");
+const segmentsContainer = document.querySelector("#segments-container");
 const sendMessageBtn = document.querySelector("#send-msg-btn");
 const videoSelect = document.querySelector("#video-select");
 const calculatedTimeText = document.querySelector("#calculated-time");
@@ -11,7 +11,7 @@ const endTimerBtn = document.querySelector("#end-time-btn");
 const resetBtn = document.querySelector("#reset-btn");
 const resetAllBtn = document.querySelector("#reset-all-btn");
 const copyBtn = document.querySelector("#copy-btn");
-const timeInput = document.querySelector("#time-instance-btn");
+const timeInput = document.querySelector("#time-segment-btn");
 const framerateInput = document.querySelector("#framerate");
 const sendBtn = document.querySelector("#send-btn");
 const changeInput = document.querySelector("#change-input-btn");
@@ -19,16 +19,13 @@ const setFramerateTo60 = document.querySelector("#sixty-framerate-btn");
 const setFramerateTo30 = document.querySelector("#thirty-framerate-btn");
 const modNoteBtn = document.querySelector("#copy-mod-note-btn");
 
-
-
 // ----------------- Basic Funcionality -----------------
 
 function generateModNote() {
-
     var modNote = 'Mod Message: The sections, "';
 
-    for (let i = 0; i < instancesContainer.childNodes.length; i++) {
-        let segment = instancesContainer.childNodes[i].segment;
+    for (let i = 0; i < segmentsContainer.childNodes.length; i++) {
+        let segment = segmentsContainer.childNodes[i].segment;
 
         if (segment == undefined) {
             continue;
@@ -36,14 +33,27 @@ function generateModNote() {
 
         modNote += segment.toString();
 
-        if (i != instancesContainer.childNodes.length - 1) {
+        if (i != segmentsContainer.childNodes.length - 1) {
             modNote += " + ";
         }
     }
 
-    modNote += ' at ' + framerateInput.value + ' fps"';
+    let framerate = framerateInput.value;
+
+    if (framerate == 0) {
+        document.querySelector("#setTimeError").innerHTML =
+            "Framerate can't be 0";
+        return;
+    }
+
+    if (framerate == "" || framerate == undefined || framerate == null) {
+        framerate = 60;
+    }
+
+    modNote += " at " + framerate + ' fps"';
     modNote += ' add up to a final time of "' + calculatedTimeText.value + '"';
-    modNote += '\nRetimed using the Retimer Chrome Extension (https://github.com/Evil004/FrameTimerExtension)';
+    modNote +=
+        "\nRetimed using the Retimer Chrome Extension (https://github.com/Evil004/FrameTimerExtension)";
 
     return modNote;
 }
@@ -60,13 +70,25 @@ function Segment(startTime) {
     this.endTime = null;
     this.time = new Time(0, 0, 0, 0);
     this.getSeconds = function () {
-        return this.endTime - this.startTime;
+        return Math.abs(this.endTime - this.startTime);
     };
     this.toString = function () {
-        return this.calculateTime();
+        let time = this.calculateTime();
+
+        if (time == undefined) {
+            return "00h 00m 00s 000ms";
+        }
+
+        return time;
     };
     this.calculateTime = function () {
         var framerate = framerateInput.value;
+
+        if (framerate == 0) {
+            document.querySelector("#setTimeError").innerHTML =
+                "Framerate can't be 0";
+            return;
+        }
 
         if (framerate == "" || framerate == undefined || framerate == null) {
             framerate = 60;
@@ -99,23 +121,23 @@ function Segment(startTime) {
 }
 
 function resetBtnFunc(resetBtn) {
-    resetBtn.parentNode.querySelector("#instance-value").innerHTML =
+    resetBtn.parentNode.querySelector("#segment-value").innerHTML =
         "00h 00m 00s 000ms";
     resetBtn.parentNode.segment = undefined;
     saveDataToLocalStorage();
 }
 
 function getSelectedInstance() {
-    var instances = instancesContainer.querySelectorAll("#time-instance-btn");
+    var segments = segmentsContainer.querySelectorAll("#time-segment-btn");
 
-    for (var i = 0; i < instances.length; i++) {
-        var input = instances[i];
+    for (var i = 0; i < segments.length; i++) {
+        var input = segments[i];
 
         // Verificar si el radio input está seleccionado
 
         if (input.getAttribute("checked") == "true") {
             // Obtener el contenedor más cercano con la clase "contenedor"
-            var contenedor = input.closest(".instance");
+            var contenedor = input.closest(".segment");
 
             return contenedor;
         }
@@ -123,10 +145,10 @@ function getSelectedInstance() {
 }
 
 function getSelectedInstanceIndex() {
-    var instances = instancesContainer.querySelectorAll("#time-instance-btn");
+    var segments = segmentsContainer.querySelectorAll("#time-segment-btn");
 
-    for (var i = 0; i < instances.length; i++) {
-        var input = instances[i];
+    for (var i = 0; i < segments.length; i++) {
+        var input = segments[i];
 
         // Verificar si el radio input está seleccionado
 
@@ -140,16 +162,11 @@ function getSelectedInstanceIndex() {
 
 window.onload = onLoad;
 
-
 function onLoad() {
-
-
-
     calculatedTimeText.segment = new Segment(0);
 
-
     getDataFromLocalStorage();
-    unselectAll()
+    unselectAll();
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var activeTab = tabs[0];
         var activeTabId = activeTab.id;
@@ -193,8 +210,8 @@ function getDataFromLocalStorage() {
         var selected = result.timeData.selected;
 
         changeSelectedInstance(
-            instancesContainer.childNodes[selected].querySelector(
-                "#time-instance-btn"
+            segmentsContainer.childNodes[selected].querySelector(
+                "#time-segment-btn"
             )
         );
     });
@@ -225,12 +242,12 @@ function setData(timeData) {
 
     for (let i = 0; i < segments.length; i++) {
         var segment = segments[i];
-        var childNode = instancesContainer.childNodes[i];
+        var childNode = segmentsContainer.childNodes[i];
 
         if (childNode == undefined) {
             addInstance();
 
-            childNode = instancesContainer.childNodes[i];
+            childNode = segmentsContainer.childNodes[i];
         }
 
         childNode.segment = new Segment(segment.startTime);
@@ -241,14 +258,20 @@ function setData(timeData) {
 
         childNode.segment.endTime = segment.endTime;
 
-        childNode.querySelector("#instance-value").innerHTML =
+        childNode.querySelector("#segment-value").innerHTML =
             childNode.segment.toString();
+    }
+
+    calculatedTimeText.segment = new Segment(timeData.calculatedTime.startTime);
+    calculatedTimeText.segment.endTime = timeData.calculatedTime.endTime;
+    if (calculatedTimeText.segment.endTime != null) {
+        calculatedTimeText.value = calculatedTimeText.segment.toString();
     }
 }
 
 function changeSelectedInstance(timeInput) {
-    instancesContainer
-        .querySelectorAll("#time-instance-btn")
+    segmentsContainer
+        .querySelectorAll("#time-segment-btn")
         .forEach((button) => {
             button.setAttribute("checked", false);
         });
@@ -257,10 +280,38 @@ function changeSelectedInstance(timeInput) {
     saveDataToLocalStorage();
 }
 
+function openWarning(isStart, newTime, contenedor) {
+    document.querySelector("#warning").style.visibility = "visible";
+
+    let warningYes = document.querySelector("#warning-yes-btn");
+    let warningNo = document.querySelector("#warning-no-btn");
+
+    warningYes.addEventListener("click", () => {
+        if (isStart) {
+            contenedor.segment.startTime = newTime;
+        } else {
+            contenedor.segment.endTime = newTime;
+        }
+
+        contenedor.querySelector("#segment-value").innerHTML =
+            contenedor.segment.toString();
+
+        document.querySelector("#warning").style.visibility = "hidden";
+
+        warningYes.removeEventListener("click", () => {});
+    });
+
+    warningNo.addEventListener("click", () => {
+        document.querySelector("#warning").style.visibility = "hidden";
+
+        warningNo.removeEventListener("click", () => {});
+    });
+}
+
 // ------------- Create JSON ----------------
 
 function getAllSegments() {
-    var contenedores = document.querySelectorAll(".instance");
+    var contenedores = document.querySelectorAll(".segment");
 
     var obj = [];
 
@@ -299,6 +350,7 @@ function createSaveJSON() {
         framerate: framerate,
         segments: obj,
         textTime: timeText.value,
+        calculatedTime: calculatedTimeText.segment,
     };
 
     return jsonObj;
@@ -309,12 +361,13 @@ function createSaveJSON() {
 function calculateTotalTime() {
     var totalSeconds = 0;
 
-    var segmets = document.querySelectorAll(".instance");
+    var segmets = document.querySelectorAll(".segment");
 
     var totalSegment = new Segment(0);
 
     for (let i = 0; i < segmets.length; i++) {
-        const segment = segmets[i].segment;
+        let segment = segmets[i].segment;
+
         var seconds = segment.getSeconds();
 
         if (seconds == null || seconds == undefined || seconds < 0) {
@@ -333,6 +386,7 @@ function calculateTotalTime() {
 
 calculateBtn.addEventListener("click", () => {
     calculatedTimeText.value = calculateTotalTime().toString();
+    saveDataToLocalStorage();
 });
 
 // ----------------- Add Instance -----------------
@@ -350,7 +404,7 @@ function addInstance() {
     removeButton.classList.add("icon");
 
     // Configurar los atributos y contenido de los elementos
-    var newChild = instancesContainer.childNodes[0].cloneNode(true);
+    var newChild = segmentsContainer.childNodes[0].cloneNode(true);
 
     var resetBtn = newChild.querySelector("#reset-btn");
 
@@ -359,31 +413,29 @@ function addInstance() {
     });
 
     newChild.segment = undefined;
-    newChild.querySelector("#instance-value").innerHTML = "00h 00m 00s 000ms";
+    newChild.querySelector("#segment-value").innerHTML = "00h 00m 00s 000ms";
 
     //timeInput.type = "text";
 
     newChild
-        .querySelector("#time-instance-btn")
+        .querySelector("#time-segment-btn")
         .addEventListener("click", () => {
-            changeSelectedInstance(
-                newChild.querySelector("#time-instance-btn")
-            );
+            changeSelectedInstance(newChild.querySelector("#time-segment-btn"));
         });
 
-    changeSelectedInstance(newChild.querySelector("#time-instance-btn"));
+    changeSelectedInstance(newChild.querySelector("#time-segment-btn"));
 
     //timeInput.disabled = true;
 
     removeButton.addEventListener("click", () => {
         if (
             newChild
-                .querySelector("#time-instance-btn")
+                .querySelector("#time-segment-btn")
                 .getAttribute("checked") == "true"
         ) {
             changeSelectedInstance(
                 newChild.previousElementSibling.querySelector(
-                    "#time-instance-btn"
+                    "#time-segment-btn"
                 )
             );
         }
@@ -393,7 +445,7 @@ function addInstance() {
     });
 
     // Agregar los elementos al contenedor principal
-    instancesContainer.appendChild(newChild);
+    segmentsContainer.appendChild(newChild);
 
     newChild.appendChild(removeButton);
 
@@ -421,7 +473,7 @@ addBtn.addEventListener("click", () => {
 resetAllBtn.addEventListener("click", () => {
     removeError();
     document.querySelector("#framerate").value = "";
-    var contenedores = document.querySelectorAll(".instance");
+    var contenedores = document.querySelectorAll(".segment");
 
     timeText.value = "0.0";
 
@@ -433,10 +485,13 @@ resetAllBtn.addEventListener("click", () => {
 
     contenedores[0].segment = undefined;
 
-    contenedores[0].querySelector("#instance-value").innerHTML =
+    contenedores[0].querySelector("#segment-value").innerHTML =
         "00h 00m 00s 000ms";
 
-    changeSelectedInstance(document.querySelector("#time-instance-btn"));
+    changeSelectedInstance(document.querySelector("#time-segment-btn"));
+
+    calculatedTimeText.value = "00h 00m 00s 000ms";
+    calculatedTimeText.segment = new Segment(0);
 
     saveDataToLocalStorage();
 });
@@ -491,19 +546,25 @@ startTimeBtn.addEventListener("click", () => {
 
         return;
     }
-    var segment = new Segment(timeText.value);
 
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
         document.querySelector("#setTimeError").innerHTML =
-            "No instance selected.";
+            "No segment selected.";
         return;
     }
 
-    contenedor.segment = segment;
-    
-    
+    if (contenedor.segment != undefined) {
+        openWarning(true, timeText.value, contenedor);
+    } else {
+        var segment = new Segment(timeText.value);
+
+        contenedor.segment = segment;
+    }
+
+    contenedor.querySelector("#segment-value").innerHTML =
+        contenedor.segment.toString();
 
     saveDataToLocalStorage();
 });
@@ -514,7 +575,7 @@ endTimerBtn.addEventListener("click", () => {
 
     if (contenedor == null) {
         document.querySelector("#setTimeError").innerHTML =
-            "No instance selected";
+            "No segment selected";
         return;
     }
 
@@ -522,18 +583,18 @@ endTimerBtn.addEventListener("click", () => {
 
     if (segment == null || segment.startTime == null) {
         document.querySelector("#setTimeError").innerHTML =
-            "The selected instance does not have a start time";
+            "The selected segment does not have a start time";
         return;
     }
 
-    segment.endTime = timeText.value;
+    if (segment.endTime != null) {
+        openWarning(false, timeText.value, contenedor);
+    } else {
+        segment.endTime = timeText.value;
+    }
 
-    contenedor.querySelector("#instance-value").innerHTML =
+    contenedor.querySelector("#segment-value").innerHTML =
         contenedor.segment.toString();
-
-        maxFrame= (maxFrame<segment.endTime)?segment.endTime:maxFrame;
-
-        minFrame= (minFrame>segment.startTime)?segment.startTime:minFrame;
 
     saveDataToLocalStorage();
 });
@@ -556,15 +617,23 @@ timeInput.addEventListener("click", () => {
 });
 
 framerateInput.addEventListener("change", () => {
+    if (framerateInput.value <= 0) {
+        document.querySelector("#setTimeError").innerHTML =
+            "The framerate cannot be 0 or lower.";
+        framerateInput.value = "";
+    }
     saveDataToLocalStorage();
 });
 
 setFramerateTo30.addEventListener("click", () => {
+    removeError();
     framerateInput.value = 30;
     saveDataToLocalStorage();
 });
 
 setFramerateTo60.addEventListener("click", () => {
+    removeError();
+
     framerateInput.value = 60;
     saveDataToLocalStorage();
 });
@@ -573,13 +642,16 @@ modNoteBtn.addEventListener("click", () => {
     removeError();
     var modNote = generateModNote();
 
+    if (modNote == undefined) {
+        return;
+    }
+
     navigator.clipboard.writeText(modNote).then(function () {
         document.querySelector("#setTimeError").innerHTML =
             "Copied to clipboard";
         document.querySelector("#setTimeError").style.color = "green";
     });
 });
-
 
 // ----------------- Execute -----------------
 
