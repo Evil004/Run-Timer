@@ -42,7 +42,7 @@ function generateModNote() {
     let framerate = framerateInput.value;
 
     if (framerate == 0) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "Framerate cannot be 0 or empty";
         return;
     }
@@ -86,7 +86,7 @@ function Segment(startTime) {
         var framerate = framerateInput.value;
 
         if (framerate == 0) {
-            document.querySelector("#setTimeError").innerHTML =
+            document.querySelector("#setTimeError").textContent =
                 "Framerate can't be 0";
             return;
         }
@@ -135,7 +135,7 @@ function resetAll() {
 
     contenedores[0].segment = undefined;
 
-    contenedores[0].querySelector("#segment-value").innerHTML =
+    contenedores[0].querySelector("#segment-value").textContent =
         "00h 00m 00s 000ms";
 
     changeSelectedInstance(document.querySelector("#time-segment-btn"));
@@ -147,7 +147,7 @@ function resetAll() {
 }
 
 function resetBtnFunc(resetBtn) {
-    resetBtn.parentNode.querySelector("#segment-value").innerHTML =
+    resetBtn.parentNode.querySelector("#segment-value").textContent =
         "00h 00m 00s 000ms";
     resetBtn.parentNode.segment = undefined;
     saveDataToLocalStorage();
@@ -219,8 +219,8 @@ function unselectAll() {
 }
 
 function removeError() {
-    document.querySelector("#setTimeError").innerHTML = "";
-    document.querySelector("#setTimeError").style.color = "red";
+    document.querySelector("#setTimeError").textContent = "";
+    document.querySelector("#setTimeError").style.color = "#ff3e30";
 }
 
 function saveDataToLocalStorage() {
@@ -284,7 +284,7 @@ function setData(timeData) {
 
         childNode.segment.endTime = segment.endTime;
 
-        childNode.querySelector("#segment-value").innerHTML =
+        childNode.querySelector("#segment-value").textContent =
             childNode.segment.toString();
     }
 
@@ -310,7 +310,7 @@ function openWarning(isStart, newTime, contenedor) {
     document.querySelector("#warning").style.visibility = "visible";
     document.querySelector("#lock").style.visibility = "visible";
 
-    document.querySelector("#warning-text").innerHTML =
+    document.querySelector("#warning-text").textContent =
         "Are you sure you want to overwrite the time?";
 
     let warningYes = document.querySelector("#warning-yes-btn");
@@ -319,12 +319,18 @@ function openWarning(isStart, newTime, contenedor) {
     warningYes.addEventListener("click", () => {
         if (isStart) {
             contenedor.segment.startTime = newTime;
+            document.querySelector("#setTimeError").textContent =
+                "A start time has been set.";
+            document.querySelector("#setTimeError").style.color = "#0067dd";
         } else {
             contenedor.segment.endTime = newTime;
+            document.querySelector("#setTimeError").textContent =
+                "A end time has been set.";
+            document.querySelector("#setTimeError").style.color = "#0067dd";
         }
 
         if (contenedor.segment.endTime != null) {
-            contenedor.querySelector("#segment-value").innerHTML =
+            contenedor.querySelector("#segment-value").textContent =
                 contenedor.segment.toString();
         }
 
@@ -347,7 +353,7 @@ function openWarningResetAll() {
     document.querySelector("#warning").style.visibility = "visible";
     document.querySelector("#lock").style.visibility = "visible";
 
-    document.querySelector("#warning-text").innerHTML =
+    document.querySelector("#warning-text").textContent =
         "Are you sure you want to reset all the data?";
 
     let warningYes = document.querySelector("#warning-yes-btn");
@@ -457,7 +463,7 @@ function calculateTotalTime() {
 
 calculateBtn.addEventListener("click", () => {
     if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate must be a number.";
         framerateInput.value = "";
         return;
@@ -490,7 +496,7 @@ function addInstance() {
     });
 
     newChild.segment = undefined;
-    newChild.querySelector("#segment-value").innerHTML = "00h 00m 00s 000ms";
+    newChild.querySelector("#segment-value").textContent = "00h 00m 00s 000ms";
 
     //timeInput.type = "text";
 
@@ -535,9 +541,9 @@ copyBtn.addEventListener("click", () => {
     removeError();
     var text = calculatedTimeText.value;
     navigator.clipboard.writeText(text).then(function () {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "Copied to clipboard";
-        document.querySelector("#setTimeError").style.color = "green";
+        document.querySelector("#setTimeError").style.color = "#00ae52";
     });
 });
 
@@ -599,7 +605,7 @@ startTimeBtn.addEventListener("click", () => {
     removeError();
 
     if (timeText.value.trim() == "" || timeText.value == "0.0") {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "You have not selected a second.";
 
         return;
@@ -608,33 +614,36 @@ startTimeBtn.addEventListener("click", () => {
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "No segment selected.";
         return;
     }
 
     if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate must be a number.";
         framerateInput.value = "";
         return;
     }
 
     if (framerateInput.value <= 0 || framerateInput.value == "") {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate cannot be 0 or lower.";
         framerateInput.value = "";
         return;
     }
 
     if (isNaN(timeText.value)) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The time must be a number.";
         timeText.value = "0.0";
         return;
     }
 
-    if (contenedor.segment != undefined) {
+    if (
+        contenedor.segment != undefined &&
+        contenedor.segment.startTime != null
+    ) {
         if (contenedor.segment.startTime == timeText.value) {
             return;
         }
@@ -643,10 +652,14 @@ startTimeBtn.addEventListener("click", () => {
         var segment = new Segment(timeText.value);
 
         contenedor.segment = segment;
+
+        document.querySelector("#setTimeError").textContent =
+            "A start time has been set.";
+        document.querySelector("#setTimeError").style.color = "#0067dd";
     }
 
     if (contenedor.segment.endTime != null) {
-        contenedor.querySelector("#segment-value").innerHTML =
+        contenedor.querySelector("#segment-value").textContent =
             contenedor.segment.toString();
     }
 
@@ -658,49 +671,63 @@ endTimerBtn.addEventListener("click", () => {
     var contenedor = getSelectedInstance();
 
     if (contenedor == null) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "No segment selected";
         return;
     }
 
     var segment = contenedor.segment;
     if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate must be a number.";
         framerateInput.value = "";
         return;
     }
 
     if (framerateInput.value <= 0 || framerateInput.value == "") {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate cannot be 0 or lower.";
         framerateInput.value = "";
         return;
     }
 
     if (segment == null || segment.startTime == null) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The selected segment does not have a start time";
         return;
     }
 
     if (isNaN(timeText.value)) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The time must be a number.";
         timeText.value = "0.0";
         return;
     }
 
-    if (segment.endTime != null) {
+    if (segment.endTime == timeText.value) {
+        saveDataToLocalStorage();
+
+        return;
+    }
+
+    if (
+        segment.endTime != null &&
+        segment.endTime != undefined &&
+        segment.startTime != segment.endTime
+    ) {
         if (segment.endTime == timeText.value) {
             return;
         }
+
         openWarning(false, timeText.value, contenedor);
     } else {
         segment.endTime = timeText.value;
+        document.querySelector("#setTimeError").textContent =
+            "A end time has been set.";
+        document.querySelector("#setTimeError").style.color = "#0067dd";
     }
 
-    contenedor.querySelector("#segment-value").innerHTML =
+    contenedor.querySelector("#segment-value").textContent =
         contenedor.segment.toString();
 
     saveDataToLocalStorage();
@@ -725,7 +752,7 @@ timeInput.addEventListener("click", () => {
 
 framerateInput.addEventListener("change", () => {
     if (framerateInput.value <= 0) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate cannot be 0 or lower.";
         framerateInput.value = "";
     }
@@ -749,7 +776,7 @@ modNoteBtn.addEventListener("click", () => {
     removeError();
 
     if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "The framerate must be a number.";
         framerateInput.value = "";
         return;
@@ -762,9 +789,9 @@ modNoteBtn.addEventListener("click", () => {
     }
 
     navigator.clipboard.writeText(modNote).then(function () {
-        document.querySelector("#setTimeError").innerHTML =
+        document.querySelector("#setTimeError").textContent =
             "Copied to clipboard";
-        document.querySelector("#setTimeError").style.color = "green";
+        document.querySelector("#setTimeError").style.color = "#00ae52";
     });
 });
 
