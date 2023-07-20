@@ -7,6 +7,10 @@ const NOTIFICATION_MESSAGES = {
     framerateIsEmpty: "Framerate cannot be empty",
     framerateUnderOrEqual0: "Framerate cannot be under 0",
     copied: "Copied to ClipBoard!",
+    timeIsEmpty: "Time cannot be empty",
+    noSegmentSelected: "No segment selected",
+    timeIsNaN: "Time must be a number",
+    timeUnder0: "Time cannot be under 0",
 };
 
 const SEND_MESSAGES = {
@@ -44,8 +48,15 @@ const BUTTONS = {
     addSegmentBtn: document.querySelector("#add-segment-btn"),
     resetAllBtn: document.querySelector("#reset-all-btn"),
     resetFirstSegmentBtn: document.querySelector("#reset-btn"),
+    firstTimeInput: document.querySelector("#time-segment-btn"),
     getExactTimeBtn: document.querySelector("#exact-time-btn"),
     sendToSRCBtn: document.querySelector("#send-btn"),
+    setStartTimeBtn: document.querySelector("#start-time-btn"),
+    setEndTimeBtn: document.querySelector("#end-time-btn"),
+    changeSRCTimeInputBtn: document.querySelector("#change-input-btn"),
+    setFramerateTo60Btn: document.querySelector("#sixty-framerate-btn"),
+    setFramerateTo30Btn: document.querySelector("#thirty-framerate-btn"),
+    copyModNoteBtn: document.querySelector("#copy-mod-note-btn"),
 };
 
 // Classes
@@ -108,9 +119,14 @@ class Segment {
 // General Functions
 
 function getFramerate() {
-    let framerate = framerateInput.value;
+    let framerate = ELEMENTS.framerateInput.value;
 
-    framerate = checkFramerate(framerate);
+    try {
+        framerate = checkFramerate(framerate);
+    } catch (error) {
+        ELEMENTS.framerateInput.value = "";
+        return;
+    }
 
     return framerate;
 }
@@ -121,25 +137,39 @@ function checkFramerate(framerate) {
     }
 
     if (isNaN(framerate)) {
-        setNotificationMessage(ERROR_MESSAGES.framerateIsNaN);
+        setNotificationMessage(NOTIFICATION_MESSAGES.framerateIsNaN);
     }
 
     if (framerate <= 0) {
-        setNotificationMessage(ERROR_MESSAGES.framerateUnderOrEqual0);
+        setNotificationMessage(NOTIFICATION_MESSAGES.framerateUnderOrEqual0);
     }
 
     return framerate;
 }
 
+function checkTime(time) {
+    if (time == "" || time == undefined || time == null) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.timeIsEmpty);
+    }
+
+    if (isNaN(time)) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.timeIsNaN);
+    }
+
+    if (time < 0) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.timeUnder0);
+    }
+}
+
 function setNotificationMessage(
     message,
     color = NOTIFICATION_COLORS.error,
-    throwException = false
+    throwException = true
 ) {
     ELEMENTS.errorMessage.textContent = message;
     ELEMENTS.errorMessage.style.color = color;
     if (throwException) {
-        throw new Error(ERROR_MESSAGES.framerateIsNaN);
+        throw new Error(NOTIFICATION_MESSAGES.framerateIsNaN);
     }
 }
 
@@ -159,16 +189,14 @@ function setCalculatedTime(time) {
     ELEMENTS.calculatedTimeText.value = time;
 }
 
-function changeSelectedInstance(segmentNode) {
+function changeSelectedSection(segmentNode) {
     let segmentsNodes = getAllSegmentsNodes();
 
     segmentsNodes.forEach((segmentNode) => {
-        segmentNode.unselectSegment();
+        unselectSegment(segmentNode);
     });
 
-    console.log(segmentNode.selectSegment);
-
-    segmentNode.selectSegment();
+    selectSegment(segmentNode);
     saveDataToLocalStorage();
 }
 
@@ -181,17 +209,17 @@ function isSelected(segmentNode) {
 }
 
 function getAllSegmentsNodes() {
-    let segmentsNodes = segmentsContainer.querySelectorAll(".segment");
+    let segmentsNodes = ELEMENTS.segmentsContainer.querySelectorAll(".segment");
 
     return segmentsNodes;
 }
 
 function getTime() {
-    return ELEMENTS.timeText.textContent;
+    return ELEMENTS.timeText.value;
 }
 
 function setTime(time) {
-    ELEMENTS.timeText.textContent = time;
+    ELEMENTS.timeText.value = time;
 }
 
 function setFramerate(framerate) {
@@ -199,24 +227,27 @@ function setFramerate(framerate) {
 }
 
 function sendMessage(messageToSend, extraData = undefined) {
-    let response = chrome.tabs.query(
-        { active: true, currentWindow: true },
-        function (tabs) {
-            var activeTab = tabs[0];
-            var activeTabId = activeTab.id;
+    return new Promise((resolve, reject) => {
+        chrome.tabs.query(
+            { active: true, currentWindow: true },
+            function (tabs) {
+                var activeTab = tabs[0];
+                var activeTabId = activeTab.id;
 
-            try {
-                chrome.tabs.sendMessage(
-                    activeTabId,
-                    { message: messageToSend, extraData: extraData },
-                    async function (response) {
-                        return response;
-                    }
-                );
-            } catch (error) {}
-        }
-    );
-    return response;
+                try {
+                    chrome.tabs.sendMessage(
+                        activeTabId,
+                        { message: messageToSend, extraData: extraData },
+                        function (response) {
+                            resolve(response); // Resolve the promise with the response
+                        }
+                    );
+                } catch (error) {
+                    reject(error); // Reject the promise in case of an error
+                }
+            }
+        );
+    });
 }
 
 // Functions
@@ -239,7 +270,14 @@ function calculateTotalSumOfSegments() {
 
 function generateModNote() {
     let segmentsTimes = getSegmentsTimeSeparatedBy("+");
-    let framerate = getFramerate();
+
+    let framerate = ELEMENTS.framerateInput.value;
+    try {
+        checkFramerate(framerate);
+    } catch (error) {
+        framerate = "";
+    }
+
     let totalTime = getCalculatedTime();
     let extensionName = MANIFEST.name;
     let repoLink = MANIFEST.homepage_url;
@@ -277,7 +315,8 @@ async function resetAll() {
 
     if (!accepted) return;
 
-    framerateInput.value = "";
+    setFramerate("");
+    setTime("0.0");
 
     resetNodes();
 
@@ -298,16 +337,16 @@ function resetNodes() {
 
     let firstSegmentNode = segmentsNodes[0];
 
-    firstSegmentNode.resetSegment();
+    resetSegment(firstSegmentNode);
 
-    changeSelectedInstance(firstSegmentNode);
+    changeSelectedSection(firstSegmentNode);
 }
 
 function getSelectedSegmentNodeAndIndex() {
     let segmentsNodes = getAllSegmentsNodes();
 
     let selectedSegment = {
-        segment: undefined,
+        segmentNode: undefined,
         index: undefined,
     };
 
@@ -321,7 +360,7 @@ function getSelectedSegmentNodeAndIndex() {
 
         if (isSelected) {
             selectedSegment = {
-                segment: segmentNode,
+                segmentNode: segmentNode,
                 index: i,
             };
             break;
@@ -348,23 +387,36 @@ function setData(timeData) {
     let framerateLoaded = timeData.framerate;
     let actualTimeLoaded = timeData.textTime;
     let calculatedSegmentLoaded = timeData.calculatedTime;
+    let selectedIndex = timeData.selectedIndex;
+
+    debugger;
 
     setTime(actualTimeLoaded);
 
-    setFramerate(framerateLoaded == undefined ? "" : framerateLoaded);
+    setFramerate(
+        framerateLoaded == undefined || framerateLoaded == null
+            ? ""
+            : framerateLoaded
+    );
 
     segmentsLoaded.forEach((segmentLoaded, index) => {
         let segmentNode = ELEMENTS.segmentsContainer.childNodes[index];
-        let segmentNodeValue =
-            segmentNode.querySelector("#segment-value").value;
+
+        if (segmentNode == undefined) {
+            addSegmentNode();
+
+            segmentNode = ELEMENTS.segmentsContainer.childNodes[index];
+        }
 
         segmentNode.segment = new Segment(
             segmentLoaded.startTime,
             segmentLoaded.endTime
         );
 
-        segmentNodeValue = segmentLoaded.toString();
+        setValue(segmentNode, segmentNode.segment.toString());
     });
+
+    changeSelectedSection(ELEMENTS.segmentsContainer.childNodes[selectedIndex]);
 
     ELEMENTS.calculatedTimeText.segment = new Segment(
         calculatedSegmentLoaded.startTime,
@@ -406,15 +458,13 @@ function addSegmentNode() {
 
     ELEMENTS.segmentsContainer.appendChild(newSegmentNode);
 
-    changeSelectedInstance(newSegmentNode);
+    changeSelectedSection(newSegmentNode);
 }
 
 function createSegmentNode() {
     let segmentNode = ELEMENTS.segmentsContainer.childNodes[0].cloneNode(true);
 
-    segmentNode.resetSegment = () => resetSegment(segmentNode);
-    segmentNode.unselectSegment = () => unselectSegment(segmentNode);
-    segmentNode.selectSegment = () => selectSegment(segmentNode);
+    debugger
 
     segmentNode.querySelector("#remove-segment-btn").onclick = () => {
         removeSegmentNode(segmentNode);
@@ -423,6 +473,12 @@ function createSegmentNode() {
     segmentNode.querySelector("#remove-segment-btn").style.visibility =
         "visible";
 
+    segmentNode.querySelector("#time-segment-btn").onclick = () => {
+        changeSelectedSectionEvent(segmentNode);
+    };
+
+    resetSegment(segmentNode);
+
     return segmentNode;
 }
 
@@ -430,7 +486,7 @@ function createSegmentNode() {
 
 function resetSegment(segmentNode) {
     segmentNode.segment = undefined;
-    segmentNode.querySelector("#segment-value").value = DEFAULT_TIME;
+    segmentNode.querySelector("#segment-value").textContent = DEFAULT_TIME;
 }
 
 function unselectSegment(segmentNode) {
@@ -445,19 +501,27 @@ function selectSegment(segmentNode) {
         .setAttribute("checked", true);
 }
 
+function setValue(segmentNode, value) {
+    segmentNode.querySelector("#segment-value").textContent = value;
+}
+
 function resetSegmentBtnFunc(resetBtn) {
-    resetBtn.parentNode.resetSegment();
+    resetSegment(resetBtn.parentNode);
     saveDataToLocalStorage();
 }
 
 function removeSegmentNode(segmentNode) {
     if (isSelected(segmentNode)) {
-        changeSelectedInstance(segmentNode.previousSibling);
+        changeSelectedSection(segmentNode.previousSibling);
     }
 
     segmentNode.remove();
 
     saveDataToLocalStorage();
+}
+
+function saveDataToLocalStorage() {
+    chrome.storage.local.set({ timeData: createSaveJSON() });
 }
 
 // JSON Functions
@@ -482,7 +546,14 @@ function getSegmentsJSON() {
 
 function createSaveJSON() {
     let segments = getSegmentsJSON();
-    let framerate = getFramerate();
+    let framerate = ELEMENTS.framerateInput.value;
+
+    try {
+        checkFramerate(framerate);
+    } catch (error) {
+        framerate = "";
+    }
+
     let textTime = getTime();
     let calculatedTime = getCalculatedTime();
     let selectedIndex = getSelectedSegmentNodeAndIndex().index;
@@ -495,6 +566,8 @@ function createSaveJSON() {
         calculatedTime: calculatedTime,
     };
 
+    console.log(timeData);
+
     return timeData;
 }
 
@@ -503,12 +576,6 @@ window.onload = executeOnLoad();
 
 function executeOnLoad() {
     ELEMENTS.calculatedTimeText.segment = new Segment(0);
-
-    let firstSegmentNode = ELEMENTS.segmentsContainer.childNodes[0];
-
-    firstSegmentNode.resetSegment = () => resetSegment(firstSegmentNode);
-    firstSegmentNode.unselectSegment = () => unselectSegment(firstSegmentNode);
-    firstSegmentNode.selectSegment = () => selectSegment(firstSegmentNode);
 
     loadSavedDataFromLocalStorage();
 
@@ -534,7 +601,8 @@ BUTTONS.copyBtn.addEventListener("click", () => {
     navigator.clipboard.writeText(calculatedTime).then(() => {
         setNotificationMessage(
             NOTIFICATION_MESSAGES.copied,
-            NOTIFICATION_COLORS.success
+            NOTIFICATION_COLORS.success,
+            false
         );
     });
 
@@ -560,16 +628,141 @@ BUTTONS.resetFirstSegmentBtn.addEventListener("click", () => {
     saveDataToLocalStorage();
 });
 
-BUTTONS.getExactTimeBtn.addEventListener("click", () => {
+BUTTONS.getExactTimeBtn.addEventListener("click", async () => {
     removeWarning();
-    let response = sendMessage(SEND_MESSAGES.getExactTime);
+    let response = await sendMessage(SEND_MESSAGES.getExactTime);
     setTime(response.time);
     saveDataToLocalStorage();
 });
 
 BUTTONS.sendToSRCBtn.addEventListener("click", () => {
     removeWarning();
-    
+
     sendMessage(SEND_MESSAGES.sendToSRC, getCalculatedTimeObject());
     saveDataToLocalStorage();
 });
+
+BUTTONS.setStartTimeBtn.addEventListener("click", async () => {
+    removeWarning();
+
+    let time = getTime();
+    let framerate = getFramerate();
+
+    checkTime(time);
+    checkFramerate(framerate);
+
+    let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;
+
+    let segment = selectedSegmentNode.segment;
+
+    let isSameTime = segment != undefined && segment.startTime == time;
+
+    if (segment == undefined) {
+        segment = new Segment(0);
+    } else {
+        if (isSameTime) return;
+
+        let accepted = await openWarningModal(
+            WARNING_MESSAGES.overwritingStartTime
+        );
+
+        if (!accepted) return;
+    }
+
+    let hasEndTime = segment.endTime != null;
+
+    segment.startTime = time;
+    selectedSegmentNode.segment = segment;
+
+    if (hasEndTime) {
+        setValue(selectedSegmentNode, segment.toString());
+    }
+
+    saveDataToLocalStorage();
+});
+
+BUTTONS.setEndTimeBtn.addEventListener("click", async () => {
+    let time = getTime();
+    let framerate = getFramerate();
+
+    checkTime(time);
+    checkFramerate(framerate);
+
+    let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;
+
+    let segment = selectedSegmentNode.segment;
+
+    let isSameTime = segment != undefined && segment.endTime == time;
+
+    if (segment == undefined) {
+        segment = new Segment(0);
+    } else {
+        if (isSameTime) return;
+
+        let accepted = await openWarningModal(
+            WARNING_MESSAGES.overwritingEndTime
+        );
+
+        if (!accepted) return;
+    }
+
+    let hasStartTime = segment.startTime != null;
+
+    segment.endTime = time;
+    selectedSegmentNode.segment = segment;
+
+    if (hasStartTime) {
+        setValue(selectedSegmentNode, segment.toString());
+    }
+
+    saveDataToLocalStorage();
+});
+
+BUTTONS.changeSRCTimeInputBtn.addEventListener("click", () => {
+    removeWarning();
+    sendMessage(SEND_MESSAGES.changeSelectedInput);
+    saveDataToLocalStorage();
+});
+
+BUTTONS.firstTimeInput.addEventListener("click", () => {
+    changeSelectedSectionEvent(ELEMENTS.segmentsContainer.childNodes[0]);
+});
+
+function changeSelectedSectionEvent(segmentNode) {
+    removeWarning();
+    changeSelectedSection(segmentNode);
+    saveDataToLocalStorage();
+}
+
+BUTTONS.setFramerateTo60Btn.addEventListener("click", () => {
+    removeWarning();
+    setFramerate(60);
+    saveDataToLocalStorage();
+});
+
+BUTTONS.setFramerateTo30Btn.addEventListener("click", () => {
+    removeWarning();
+    setFramerate(30);
+    saveDataToLocalStorage();
+});
+
+BUTTONS.copyModNoteBtn.addEventListener("click", () => {
+    removeWarning();
+    let modNote = generateModNote();
+
+    navigator.clipboard.writeText(modNote).then(() => {
+        setNotificationMessage(
+            NOTIFICATION_MESSAGES.copied,
+            NOTIFICATION_COLORS.success,
+            false
+        );
+    });
+
+    saveDataToLocalStorage();
+});
+
+ELEMENTS.lock.addEventListener("click", () => {
+    ELEMENTS.warningModal.querySelector("#warning-no-btn").click();
+});
+
+ELEMENTS.segmentsContainer.childNodes[0].setAttribute("checked", true);

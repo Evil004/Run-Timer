@@ -1,4 +1,4 @@
-const timeText = document.querySelector("#time-text");
+/*const timeText = document.querySelector("#time-text");
 const segmentsContainer = document.querySelector("#segments-container");
 const sendMessageBtn = document.querySelector("#send-msg-btn");
 const videoSelect = document.querySelector("#video-select");
@@ -221,12 +221,11 @@ function removeError() {
     document.querySelector("#error-message").innerHTML = "";
     document.querySelector("#error-message").style.color = "red";
 }
-*/
 
 function saveDataToLocalStorage() {
     chrome.storage.local.set({ timeData: createSaveJSON() });
 }
-/*
+
 function getDataFromLocalStorage() {
     chrome.storage.local.get(["timeData"], function (result) {
         var obj = result.timeData;
@@ -594,7 +593,7 @@ sendBtn.addEventListener("click", () => {
             }
         );
     });
-});*/
+});
 
 startTimeBtn.addEventListener("click", () => {
     removeWarning();
@@ -606,7 +605,7 @@ startTimeBtn.addEventListener("click", () => {
         return;
     }
 
-    var contenedor = getSelectedSegmentNodeAndIndex().segment;
+    var contenedor = getSelectedSegmentNodeAndIndex().segmentNode;
 
     if (contenedor == null) {
         document.querySelector("#error-message").innerHTML =
@@ -657,7 +656,7 @@ startTimeBtn.addEventListener("click", () => {
 endTimerBtn.addEventListener("click", () => {
     removeWarning();
     debugger;
-    var contenedor = getSelectedSegmentNodeAndIndex().segment;
+    var contenedor = getSelectedSegmentNodeAndIndex().segmentNode;
 
     if (contenedor == null) {
         document.querySelector("#error-message").innerHTML =
@@ -783,4 +782,4 @@ lock.addEventListener("click", () => {
 timeInput.setAttribute("checked", true);
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
-}
+}*/
