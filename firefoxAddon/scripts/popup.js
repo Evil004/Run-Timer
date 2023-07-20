@@ -32,6 +32,7 @@ const WARNING_MESSAGES = {
     overwritingStartTime: "Are you sure you want to overwrite the start time?",
     overwritingEndTime: "Are you sure you want to overwrite the end time?",
     resetAll: "Are you sure you want to reset all?",
+    deleteSegment: "Are you sure you want to delete this segment?",
 };
 
 const ELEMENTS = {
@@ -88,14 +89,12 @@ class Segment {
 
         checkFramerate(framerate);
 
-        let frames = this.getFrames() * framerate;
-        let hours = Math.floor(frames / (3600 * framerate));
-        let minutes = Math.floor(
-            (frames % (3600 * framerate)) / (60 * framerate)
-        );
-        let seconds = Math.floor((frames % (60 * framerate)) / framerate);
+        let frames = this.getFrames();
+        let hours = Math.floor(frames / 3600);
+        let minutes = Math.floor((frames % 3600) / 60);
+        let seconds = Math.floor(frames % 60);
         let milliseconds = Math.floor(
-            (frames % framerate) * (1000 / framerate)
+            ((frames % framerate) - Math.floor(frames % framerate)) * 1000
         );
 
         this.time = new Time(hours, minutes, seconds, milliseconds);
@@ -275,12 +274,12 @@ function generateModNote() {
 
     let framerate = ELEMENTS.framerateInput.value;
     try {
-        checkFramerate(framerate);
+        framerate = checkFramerate(framerate);
     } catch (error) {
-        framerate = "";
+        framerate = 60;
     }
 
-    let totalTime = getCalculatedTime();
+    let totalTime = calculateTotalSumOfSegments().toString();
     let extensionName = MANIFEST.name;
     let repoLink = MANIFEST.homepage_url;
 
@@ -413,7 +412,12 @@ function setData(timeData) {
             segmentLoaded.endTime
         );
 
-        setValue(segmentNode, segmentNode.segment.toString());
+        if (
+            segmentNode.segment.endTime != null &&
+            segmentNode.segment.startTime != null
+        ) {
+            setValue(segmentNode, segmentNode.segment.toString());
+        }
     });
 
     changeSelectedSection(ELEMENTS.segmentsContainer.childNodes[selectedIndex]);
@@ -422,9 +426,7 @@ function setData(timeData) {
         calculatedSegmentLoaded.startTime,
         calculatedSegmentLoaded.endTime
     );
-    if (ELEMENTS.calculatedTimeText.segment.endTime != null) {
-        setCalculatedTime(ELEMENTS.calculatedTimeText.segment.toString());
-    }
+    setCalculatedTime(timeData.calculatedTime);
 }
 
 function sendOpenedMessage() {
@@ -454,6 +456,7 @@ function openWarningModal(message) {
 }
 
 function addSegmentNode() {
+    debugger    
     let newSegmentNode = createSegmentNode();
 
     ELEMENTS.segmentsContainer.appendChild(newSegmentNode);
@@ -512,7 +515,24 @@ function resetSegmentBtnFunc(resetBtn) {
     saveDataToLocalStorage();
 }
 
-function removeSegmentNode(segmentNode) {
+async function removeSegmentNode(segmentNode) {
+    console.log(segmentNode);
+    if (segmentNode.segment == undefined) {
+        if (isSelected(segmentNode)) {
+            changeSelectedSection(segmentNode.previousSibling);
+        }
+        segmentNode.remove();
+        
+        return;
+    }
+    if (
+        segmentNode.segment.startTime != null ||
+        segmentNode.segment.endTime != null
+    ) {
+        let accepted = await openWarningModal(WARNING_MESSAGES.deleteSegment);
+
+        if (!accepted) return;
+    }
     if (isSelected(segmentNode)) {
         changeSelectedSection(segmentNode.previousSibling);
     }
@@ -537,7 +557,7 @@ function getSegmentsJSON() {
         let segment = segmentNode.segment;
 
         if (segment == undefined) {
-            segment = new Segment(0);
+            segment = new Segment(null);
         }
 
         segments.push(segment);
@@ -596,7 +616,7 @@ BUTTONS.calculateBtn.addEventListener("click", () => {
 
 BUTTONS.copyBtn.addEventListener("click", () => {
     removeWarning();
-    let calculatedTime = getCalculatedTime();
+    let calculatedTime = calculateTotalSumOfSegments().toString();
 
     navigator.clipboard.writeText(calculatedTime).then(() => {
         setNotificationMessage(
@@ -631,7 +651,10 @@ BUTTONS.resetFirstSegmentBtn.addEventListener("click", () => {
 BUTTONS.getExactTimeBtn.addEventListener("click", async () => {
     removeWarning();
     let response = await sendMessage(SEND_MESSAGES.getExactTime);
-    setTime(response.time);
+    let fps = getFramerate();
+    fps = checkFramerate(fps);
+    let time = Math.floor(response.time * fps) / fps;
+    setTime(time);
     saveDataToLocalStorage();
 });
 
@@ -657,7 +680,7 @@ BUTTONS.setStartTimeBtn.addEventListener("click", async () => {
 
     let isSameTime = segment != undefined && segment.startTime == time;
 
-    if (segment == undefined || segment.startTime == null ) {
+    if (segment == undefined || segment.startTime == null) {
         segment = new Segment(0);
     } else {
         if (isSameTime) return;
@@ -693,7 +716,7 @@ BUTTONS.setEndTimeBtn.addEventListener("click", async () => {
 
     checkTime(time);
     checkFramerate(framerate);
-    debugger
+
 
     let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;
 
@@ -704,9 +727,12 @@ BUTTONS.setEndTimeBtn.addEventListener("click", async () => {
     let isSameTimeAsStartTime =
         parseFloat(segment.startTime) == parseFloat(segment.endTime);
 
-    if (segment == undefined || segment.endTime == null  || isSameTimeAsStartTime) {
-        segment.endTime = time
-
+    if (
+        segment == undefined ||
+        segment.endTime == null ||
+        isSameTimeAsStartTime
+    ) {
+        segment.endTime = time;
     } else {
         if (isSameTime) return;
 
