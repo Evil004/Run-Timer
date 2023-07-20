@@ -144,7 +144,6 @@ function resetAll() {
 
     saveDataToLocalStorage();
 }
-*/
 
 function resetBtnFunc(resetBtn) {
     resetBtn.parentNode.querySelector("#segment-value").innerHTML =
@@ -204,7 +203,6 @@ function onLoad() {
         );
     });
 }
-
 function unselectAll() {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var activeTab = tabs[0];
@@ -218,15 +216,17 @@ function unselectAll() {
     });
 }
 
+
 function removeError() {
     document.querySelector("#error-message").innerHTML = "";
     document.querySelector("#error-message").style.color = "red";
 }
+*/
 
 function saveDataToLocalStorage() {
     chrome.storage.local.set({ timeData: createSaveJSON() });
 }
-
+/*
 function getDataFromLocalStorage() {
     chrome.storage.local.get(["timeData"], function (result) {
         var obj = result.timeData;
@@ -293,7 +293,7 @@ function setData(timeData) {
     if (calculatedTimeText.segment.endTime != null) {
         calculatedTimeText.value = calculatedTimeText.segment.toString();
     }
-}
+}*/
 
 /*
 function changeSelectedInstance(timeInput) {
@@ -487,7 +487,7 @@ function addInstance() {
     var resetBtn = newChild.querySelector("#reset-btn");
 
     resetBtn.addEventListener("click", () => {
-        resetBtnFunc(resetBtn);
+        sesetSegmentBtnFunc(resetBtn);
     });
 
     newChild.segment = undefined;
@@ -556,7 +556,7 @@ resetAllBtn.addEventListener("click", () => {
 
 resetBtn.addEventListener("click", () => {
     removeError();
-    resetBtnFunc(resetBtn);
+    sesetSegmentBtnFunc(resetBtn);
 });
 
 getExactTimeBtn.addEventListener("click", () => {

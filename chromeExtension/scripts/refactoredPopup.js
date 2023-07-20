@@ -1,13 +1,22 @@
 const DEFAULT_FRAMERATE = 60;
 const MANIFEST = chrome.runtime.getManifest();
 const DEFAULT_TIME = "00h 00m 00s 000ms";
-const ERROR_MESSAGES = {
+const NOTIFICATION_MESSAGES = {
     framerateIsNaN: "Framerate must be a number",
     framerateIsEmpty: "Framerate cannot be empty",
     framerateUnderOrEqual0: "Framerate cannot be under 0",
 };
+
+const NOTIFICATION_COLORS = {
+    error: "#ff0000",
+    success: "#00ff00",
+    visualOutput: "#0000ff",
+};
+
 const elements = {
-    errorMessage: document.querySelector("#error-message"),
+    framerateInput: document.querySelector("#framerate"),
+    timeText: document.querySelector("#time-text"),
+    errorMessage: document.querySelector("#notification-message"),
     segmentsContainer: document.querySelector("#segments-container"),
     calculatedTimeText: document.querySelector("#calculated-time"),
 };
@@ -67,8 +76,6 @@ class Segment {
     }
 }
 
-
-
 // General Functions
 
 function getFramerate() {
@@ -95,13 +102,22 @@ function checkFramerate(framerate) {
     return framerate;
 }
 
-function setErrorMessag(message) {
+function setErrorMessag(message, color = NOTIFICATION_COLORS.error) {
     elements.errorMessage.textContent = message;
+    elements.errorMessage.style.color = color;
     throw new Error(ERROR_MESSAGES.framerateIsNaN);
+}
+
+function removeError() {
+    elements.errorMessage.textContent = "";
 }
 
 function getCalculatedTime() {
     return elements.calculatedTimeText.value;
+}
+
+function setCalculatedTime(time) {
+    elements.calculatedTimeText.textContent = time;
 }
 
 function changeSelectedInstance(segmentNode) {
@@ -119,6 +135,18 @@ function getAllSegmentsNodes() {
     let segmentsNodes = segmentsContainer.querySelectorAll(".segment");
 
     return segmentsNodes;
+}
+
+function getTime(){
+    return elements.timeText.textContent;
+}
+
+function setTime(time) {
+    elements.timeText.textContent = time;
+}
+
+function setFramerate(framerate) {
+    elements.framerateInput.value = framerate;
 }
 
 // Functions
@@ -183,6 +211,95 @@ function resetNodes() {
     changeSelectedInstance(firstSegmentNode);
 }
 
+function getSelectedSegmentNodeAndIndex() {
+    let segmentsNodes = getAllSegmentsNodes();
+
+    let selectedSegment = {
+        segment: undefined,
+        index: undefined,
+    };
+
+    for (let i = 0; i < segmentsNodes.length; i++) {
+        let segmentNode = segmentsNodes[i];
+
+        let isSelected =
+            segmentNode
+                .querySelector("#time-segment-btn")
+                .getAttribute("checked") == "true";
+
+        if (isSelected) {
+            selectedSegment = {
+                segment: segmentNode,
+                index: i,
+            };
+            break;
+        }
+    }
+
+    return selectedSegment;
+}
+
+function loadSavedDataFromLocalStorage() {
+    chrome.storage.local.get(["timeData"], function (result) {
+        let timeData = result.timeData;
+
+        if (timeData == undefined) {
+            return;
+        }
+
+        setData(timeData);
+    });
+}
+
+function setData(timeData) {
+    let segmentsLoaded = timeData.segments;
+    let framerateLoaded = timeData.framerate;
+    let actualTimeLoaded = timeData.textTime;
+    let calculatedSegmentLoaded = timeData.calculatedTime;
+
+    setTime(actualTimeLoaded);
+
+    setFramerate(framerateLoaded == undefined ? "" : framerateLoaded);
+
+    segmentsLoaded.forEach((segmentLoaded, index) => {
+        let segmentNode = elements.segmentsContainer.childNodes[index];
+        let segmentNodeValue =
+            segmentNode.querySelector(".segment-value").value;
+
+        segmentNode.segment = new Segment(
+            segmentLoaded.startTime,
+            segmentLoaded.endTime
+        );
+
+        segmentNodeValue = segmentLoaded.toString();
+    });
+
+    elements.calculatedTimeText.segment = new Segment(
+        calculatedSegmentLoaded.startTime,
+        calculatedSegmentLoaded.endTime
+    );
+    if (elements.calculatedTimeText.segment.endTime != null) {
+        setCalculatedTime(elements.calculatedTimeText.segment.toString());
+    }
+}
+
+function sendOpenedMessage() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var activeTabId = activeTab.id;
+
+        try {
+            chrome.tabs.sendMessage(
+                activeTabId,
+                { message: "openedExtension" },
+                async function (response) {}
+            );
+        } catch (error) {
+        }
+    });
+}
+
+
 // Segment Node Functions
 
 function resetSegment(segmentNode) {
@@ -191,11 +308,20 @@ function resetSegment(segmentNode) {
 }
 
 function unselectSegment(segmentNode) {
-    segmentNode.querySelector("#time-segment-btn").setAttribute("checked", false);
+    segmentNode
+        .querySelector("#time-segment-btn")
+        .setAttribute("checked", false);
 }
 
 function selectSegment(segmentNode) {
-    segmentNode.querySelector("#time-segment-btn").setAttribute("checked", true);
+    segmentNode
+        .querySelector("#time-segment-btn")
+        .setAttribute("checked", true);
+}
+
+function sesetSegmentBtnFunc(resetBtn) {
+    resetBtn.parentNode.resetSegment();
+    saveDataToLocalStorage();
 }
 
 function addResetSegmentFunctionalityToAllSegments() {
@@ -207,7 +333,7 @@ function addResetSegmentFunctionalityToAllSegments() {
 }
 
 function addSelectSegmentFunctionalityToAllSegments() {
-    let segmentsNodes = getAllSegmentsNodes;
+    let segmentsNodes = getAllSegmentsNodes();
 
     segmentsNodes.forEach((segmentNode) => {
         segmentNode.selectSegment = () => selectSegment(segmentNode);
@@ -215,7 +341,7 @@ function addSelectSegmentFunctionalityToAllSegments() {
 }
 
 function addUnselectSegmentFunctionalityToAllSegments() {
-    let segmentsNodes = getAllSegmentsNodes;
+    let segmentsNodes = getAllSegmentsNodes();
 
     segmentsNodes.forEach((segmentNode) => {
         segmentNode.unselectSegment = () => unselectSegment(segmentNode);
@@ -225,3 +351,57 @@ function addUnselectSegmentFunctionalityToAllSegments() {
 addResetSegmentFunctionalityToAllSegments();
 addSelectSegmentFunctionalityToAllSegments();
 addUnselectSegmentFunctionalityToAllSegments();
+
+// JSON Functions
+
+function getSegmentsJSON() {
+
+    let segmentsNodes = getAllSegmentsNodes();
+
+    let segments = [];
+
+    segmentsNodes.forEach((segmentNode) => {
+        let segment = segmentNode.segment;
+
+        if (segment == undefined) {
+            segment = new Segment(0);
+        }
+
+        segments.push(segment);
+    });
+
+    return segments;
+
+}
+
+function createSaveJSON() {
+    let segments = getSegmentsJSON();
+    let framerate = getFramerate();
+    let textTime = getTime();
+    let calculatedTime = getCalculatedTime();
+    let selectedIndex = getSelectedSegmentNodeAndIndex().index;
+
+    let timeData = {
+        selectedIndex: selectedIndex,
+        segments: segments,
+        framerate: framerate,
+        textTime: textTime,
+        calculatedTime: calculatedTime,
+    };
+
+
+    return timeData;
+}
+
+
+// Execution
+window.onload = executeOnLoad();
+
+function executeOnLoad() {
+    elements.calculatedTimeText.segment = new Segment(0);
+
+    loadSavedDataFromLocalStorage();
+
+    sendOpenedMessage();
+}
+
