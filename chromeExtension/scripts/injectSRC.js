@@ -52,10 +52,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                 "[name$=millisecond]"
             );
 
-            let hours = request.time.hours;
-            let minutes = request.time.minutes;
-            let seconds = request.time.seconds;
-            let milliseconds = request.time.milliseconds;
+            let hours = request.extraData.hours;
+            let minutes = request.extraData.minutes;
+            let seconds = request.extraData.seconds;
+            let milliseconds = request.extraData.milliseconds;
 
             hourInput.value = hours;
             minuteInput.value = minutes;

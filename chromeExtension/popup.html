@@ -7,7 +7,7 @@
         <link type="text/css" rel="stylesheet" href="style.css" />
     </head>
         <header>
-            <h1>Frame Timer</h1>
+            <h1>Youtube Run-Timer</h1>
 
             <a
                 href="https://github.com/Evil004/FrameTimerExtension/wiki"
@@ -41,10 +41,13 @@
                     <button id="reset-btn" class="icon">
                         <img src="icons/reset.png" />
                     </button>
+                    <button style="visibility: hidden;" id="remove-segment-btn" class="icon">
+                        <img src="icons/remove.png" />
+                    </button>
                 </div></div>
 
             <div>
-                <button id="add-btn" class="icon">
+                <button id="add-segment-btn" class="icon">
                     <img src="icons/plus.png" />
                 </button>
             </div>
@@ -88,7 +91,7 @@
                 <img src="icons/warning.png" id="warning-icon" class="warning-icon"></img>
                 <h1 id="warning-title" class="warning-title">WARNING</h1>
             </div>
-            <p id="warning-text" class="warning-text">
+            <p id="warning-message" class="warning-text">
                 Are you sure you want to overwrite the time?
             </p>
             <button id="warning-yes-btn">Yes</button>

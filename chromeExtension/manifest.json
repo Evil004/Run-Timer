@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Youtube Run-Timer",
-    "version": "1.0",
+    "version": "1.0.1",
     "description": "A Efficient Tool used for retiming.",
     "homepage_url": "https://github.com/Evil004/Youtube-Run-Timer",
     "icons": {

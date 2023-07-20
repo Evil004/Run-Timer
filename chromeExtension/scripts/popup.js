@@ -305,7 +305,7 @@ function changeSelectedInstance(timeInput) {
 
     timeInput.setAttribute("checked", true);
     saveDataToLocalStorage();
-}*/
+}
 
 function openWarning(isStart, newTime, contenedor) {
     document.querySelector("#warning").style.visibility = "visible";
@@ -370,10 +370,10 @@ function openWarningResetAll() {
 
         warningNo.removeEventListener("click", () => {});
     });
-}
+}*/
 
 // ------------- Create JSON ----------------
-
+/*
 function getAllSegments() {
     var contenedores = document.querySelectorAll(".segment");
 
@@ -487,7 +487,7 @@ function addInstance() {
     var resetBtn = newChild.querySelector("#reset-btn");
 
     resetBtn.addEventListener("click", () => {
-        sesetSegmentBtnFunc(resetBtn);
+        resetSegmentBtnFunc(resetBtn);
     });
 
     newChild.segment = undefined;
@@ -543,24 +543,24 @@ copyBtn.addEventListener("click", () => {
 });
 
 addBtn.addEventListener("click", () => {
-    removeError();
-    addInstance();
+    removeWarning();
+    addSegmentNode();
     saveDataToLocalStorage();
 });
 
 resetAllBtn.addEventListener("click", () => {
-    removeError();
+    removeWarning();
 
-    openWarningResetAll();
+    resetAll();
 });
 
 resetBtn.addEventListener("click", () => {
-    removeError();
-    sesetSegmentBtnFunc(resetBtn);
+    removeWarning();
+    resetSegmentBtnFunc(resetBtn);
 });
 
 getExactTimeBtn.addEventListener("click", () => {
-    removeError();
+    removeWarning();
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var activeTab = tabs[0];
         var activeTabId = activeTab.id;
@@ -577,7 +577,7 @@ getExactTimeBtn.addEventListener("click", () => {
 });
 
 sendBtn.addEventListener("click", () => {
-    removeError();
+    removeWarning();
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var activeTab = tabs[0];
         var activeTabId = activeTab.id;
@@ -594,10 +594,10 @@ sendBtn.addEventListener("click", () => {
             }
         );
     });
-});
+});*/
 
 startTimeBtn.addEventListener("click", () => {
-    removeError();
+    removeWarning();
 
     if (timeText.value.trim() == "" || timeText.value == "0.0") {
         document.querySelector("#error-message").innerHTML =
@@ -606,7 +606,7 @@ startTimeBtn.addEventListener("click", () => {
         return;
     }
 
-    var contenedor = getSelectedInstance();
+    var contenedor = getSelectedSegmentNodeAndIndex().segment;
 
     if (contenedor == null) {
         document.querySelector("#error-message").innerHTML =
@@ -655,8 +655,9 @@ startTimeBtn.addEventListener("click", () => {
 });
 
 endTimerBtn.addEventListener("click", () => {
-    removeError();
-    var contenedor = getSelectedInstance();
+    removeWarning();
+    debugger;
+    var contenedor = getSelectedSegmentNodeAndIndex().segment;
 
     if (contenedor == null) {
         document.querySelector("#error-message").innerHTML =
@@ -734,20 +735,20 @@ framerateInput.addEventListener("change", () => {
 });
 
 setFramerateTo30.addEventListener("click", () => {
-    removeError();
+    removeWarning();
     framerateInput.value = 30;
     saveDataToLocalStorage();
 });
 
 setFramerateTo60.addEventListener("click", () => {
-    removeError();
+    removeWarning();
 
     framerateInput.value = 60;
     saveDataToLocalStorage();
 });
 
 modNoteBtn.addEventListener("click", () => {
-    removeError();
+    removeWarning();
 
     if (isNaN(framerateInput.value)) {
         document.querySelector("#error-message").innerHTML =
@@ -770,7 +771,7 @@ modNoteBtn.addEventListener("click", () => {
 });
 
 lock.addEventListener("click", () => {
-    removeError();
+    removeWarning();
 
     document.querySelector("#warning").style.visibility = "hidden";
     document.querySelector("#lock").style.visibility = "hidden";
