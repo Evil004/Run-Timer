@@ -1,811 +1,808 @@
-const timeText = document.querySelector("#time-text");
-const segmentsContainer = document.querySelector("#segments-container");
-const sendMessageBtn = document.querySelector("#send-msg-btn");
-const videoSelect = document.querySelector("#video-select");
-const calculatedTimeText = document.querySelector("#calculated-time");
-const calculateBtn = document.querySelector("#calculate-btn");
-const addBtn = document.querySelector("#add-btn");
-const getExactTimeBtn = document.querySelector("#exact-time-btn");
-const startTimeBtn = document.querySelector("#start-time-btn");
-const endTimerBtn = document.querySelector("#end-time-btn");
-const resetBtn = document.querySelector("#reset-btn");
-const resetAllBtn = document.querySelector("#reset-all-btn");
-const copyBtn = document.querySelector("#copy-btn");
-const timeInput = document.querySelector("#time-segment-btn");
-const framerateInput = document.querySelector("#framerate");
-const sendBtn = document.querySelector("#send-btn");
-const changeInput = document.querySelector("#change-input-btn");
-const setFramerateTo60 = document.querySelector("#sixty-framerate-btn");
-const setFramerateTo30 = document.querySelector("#thirty-framerate-btn");
-const modNoteBtn = document.querySelector("#copy-mod-note-btn");
-const lock = document.querySelector("#lock");
+const DEFAULT_FRAMERATE = 60;
+const MANIFEST = chrome.runtime.getManifest();
+const DEFAULT_TIME = "00h 00m 00s 000ms";
 
-// ----------------- Basic Funcionality -----------------
+const NOTIFICATION_MESSAGES = {
+    framerateIsNaN: "Framerate must be a number",
+    framerateIsEmpty: "Framerate cannot be empty",
+    framerateUnderOrEqual0: "Framerate cannot be under 0",
+    copied: "Copied to ClipBoard!",
+    timeIsEmpty: "Time cannot be empty",
+    noSegmentSelected: "No segment selected",
+    timeIsNaN: "Time must be a number",
+    timeUnder0: "Time cannot be under 0",
+    startTimeSaved: "Start time saved!",
+    endTimeSaved: "End time saved!",
+};
 
-function generateModNote() {
-    var modNote = 'Mod Message: The sections, "';
+const SEND_MESSAGES = {
+    openedExtension: "openedExtension",
+    changeSelectedInput: "changeSelectedInput",
+    setTime: "setTime",
+    getExactTime: "getExactTime",
+};
 
-    for (let i = 0; i < segmentsContainer.childNodes.length; i++) {
-        let segment = segmentsContainer.childNodes[i].segment;
+const NOTIFICATION_COLORS = {
+    error: "#ff3e30",
+    success: "#00ae52",
+    visualOutput: "#0067dd",
+};
 
-        if (segment == undefined) {
-            continue;
-        }
+const WARNING_MESSAGES = {
+    overwritingStartTime: "Are you sure you want to overwrite the start time?",
+    overwritingEndTime: "Are you sure you want to overwrite the end time?",
+    resetAll: "Are you sure you want to reset all?",
+    deleteSegment: "Are you sure you want to delete this segment?",
+};
 
-        modNote += segment.toString();
+const ELEMENTS = {
+    framerateInput: document.querySelector("#framerate"),
+    timeText: document.querySelector("#time-text"),
+    errorMessage: document.querySelector("#notification-message"),
+    segmentsContainer: document.querySelector("#segments-container"),
+    calculatedTimeText: document.querySelector("#calculated-time"),
+    warningModal: document.querySelector("#warning"),
+    lock: document.querySelector("#lock"),
+};
 
-        if (i != segmentsContainer.childNodes.length - 1) {
-            modNote += " + ";
-        }
+const BUTTONS = {
+    calculateBtn: document.querySelector("#calculate-btn"),
+    copyBtn: document.querySelector("#copy-btn"),
+    addSegmentBtn: document.querySelector("#add-segment-btn"),
+    resetAllBtn: document.querySelector("#reset-all-btn"),
+    resetFirstSegmentBtn: document.querySelector("#reset-btn"),
+    firstTimeInput: document.querySelector("#time-segment-btn"),
+    getExactTimeBtn: document.querySelector("#exact-time-btn"),
+    sendToSRCBtn: document.querySelector("#send-btn"),
+    setStartTimeBtn: document.querySelector("#start-time-btn"),
+    setEndTimeBtn: document.querySelector("#end-time-btn"),
+    changeSRCTimeInputBtn: document.querySelector("#change-input-btn"),
+    setFramerateTo60Btn: document.querySelector("#sixty-framerate-btn"),
+    setFramerateTo30Btn: document.querySelector("#thirty-framerate-btn"),
+    copyModNoteBtn: document.querySelector("#copy-mod-note-btn"),
+};
+
+// Classes
+
+class Time {
+    constructor(hours, minutes, seconds, milliseconds) {
+        this.hours = hours;
+        this.minutes = minutes;
+        this.seconds = seconds;
+        this.milliseconds = milliseconds;
+    }
+}
+
+class Segment {
+    constructor(startTime, endTime = null) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.time = new Time();
     }
 
-    let framerate = framerateInput.value;
+    getFrames() {
+        return Math.abs(this.endTime - this.startTime);
+    }
 
-    if (framerate == 0) {
-        document.querySelector("#setTimeError").textContent =
-            "Framerate cannot be 0 or empty";
+    calculateTime() {
+        let framerate = getFramerate();
+
+        checkFramerate(framerate);
+
+        let frames = this.getFrames();
+        let hours = Math.floor(frames / 3600);
+        let minutes = Math.floor((frames % 3600) / 60);
+        let seconds = Math.floor(frames % 60);
+        let milliseconds = Math.floor(((frames % framerate) - Math.floor(frames % framerate)) * 1000);
+
+        this.time = new Time(hours, minutes, seconds, milliseconds);
+    }
+
+    getTime() {
+        this.calculateTime();
+
+        return this.time;
+    }
+
+    toString() {
+        let time = this.getTime();
+        let hours = time.hours.toString().padStart(2, "0");
+        let minutes = time.minutes.toString().padStart(2, "0");
+        let seconds = time.seconds.toString().padStart(2, "0");
+        let milliseconds = time.milliseconds.toString().padStart(3, "0");
+
+        return `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
+    }
+}
+
+// General Functions
+
+function getFramerate() {
+    let framerate = ELEMENTS.framerateInput.value;
+
+    try {
+        framerate = checkFramerate(framerate);
+    } catch (error) {
+        ELEMENTS.framerateInput.value = "";
         return;
     }
 
+    return framerate;
+}
+
+function checkFramerate(framerate) {
     if (framerate == "" || framerate == undefined || framerate == null) {
+        framerate = DEFAULT_FRAMERATE;
+    }
+
+    if (isNaN(framerate)) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.framerateIsNaN);
+    }
+
+    if (framerate <= 0) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.framerateUnderOrEqual0);
+    }
+
+    return framerate;
+}
+
+function checkTime(time) {
+    if (time == "" || time == undefined || time == null) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.timeIsEmpty);
+    }
+
+    if (isNaN(time)) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.timeIsNaN);
+    }
+
+    if (time < 0) {
+        setNotificationMessage(NOTIFICATION_MESSAGES.timeUnder0);
+    }
+}
+
+function setNotificationMessage(
+    message,
+    color = NOTIFICATION_COLORS.error,
+    throwException = true
+) {
+    ELEMENTS.errorMessage.textContent = message;
+    ELEMENTS.errorMessage.style.color = color;
+    if (throwException) {
+        throw new Error(NOTIFICATION_MESSAGES.framerateIsNaN);
+    }
+}
+
+function removeWarning() {
+    ELEMENTS.errorMessage.textContent = "";
+}
+
+function getCalculatedTime() {
+    return ELEMENTS.calculatedTimeText.value;
+}
+
+function getCalculatedTimeObject() {
+    return ELEMENTS.calculatedTimeText.segment.time;
+}
+
+function setCalculatedTime(time) {
+    ELEMENTS.calculatedTimeText.value = time;
+}
+
+function changeSelectedSection(segmentNode) {
+    let segmentsNodes = getAllSegmentsNodes();
+
+    segmentsNodes.forEach((segmentNode) => {
+        unselectSegment(segmentNode);
+    });
+
+    selectSegment(segmentNode);
+    saveDataToLocalStorage();
+}
+
+function isSelected(segmentNode) {
+    return (
+        segmentNode
+            .querySelector("#time-segment-btn")
+            .getAttribute("checked") == "true"
+    );
+}
+
+function getAllSegmentsNodes() {
+    let segmentsNodes = ELEMENTS.segmentsContainer.querySelectorAll(".segment");
+
+    return segmentsNodes;
+}
+
+function getTime() {
+    return ELEMENTS.timeText.value;
+}
+
+function setTime(time) {
+    ELEMENTS.timeText.value = time;
+}
+
+function setFramerate(framerate) {
+    ELEMENTS.framerateInput.value = framerate;
+}
+
+function sendMessage(messageToSend, extraData = undefined) {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.query(
+            { active: true, currentWindow: true },
+            function (tabs) {
+                var activeTab = tabs[0];
+                var activeTabId = activeTab.id;
+
+                try {
+                    chrome.tabs.sendMessage(
+                        activeTabId,
+                        { message: messageToSend, extraData: extraData },
+                        function (response) {
+                            resolve(response); // Resolve the promise with the response
+                        }
+                    );
+                } catch (error) {
+                    reject(error); // Reject the promise in case of an error
+                }
+            }
+        );
+    });
+}
+
+// Functions
+
+function calculateTotalSumOfSegments() {
+    let segmentsNodes = getAllSegmentsNodes();
+
+    let totalSum = 0;
+
+    segmentsNodes.forEach((segmentNode) => {
+        let segment = segmentNode.segment;
+
+        if (segment != undefined) {
+            totalSum += segment.getFrames();
+        }
+    });
+
+    return new Segment(0, totalSum);
+}
+
+function generateModNote() {
+    let segmentsTimes = getSegmentsTimeSeparatedBy("+");
+
+    let framerate = ELEMENTS.framerateInput.value;
+    try {
+        framerate = checkFramerate(framerate);
+    } catch (error) {
         framerate = 60;
     }
 
-    modNote += " at " + framerate + ' fps"';
-    modNote += ' add up to a final time of "' + calculatedTimeText.value + '"';
-    modNote +=
-        "\nRetimed using the Retimer Chrome Extension (https://github.com/Evil004/FrameTimerExtension)";
+    let totalTime = calculateTotalSumOfSegments().toString();
+    let extensionName = MANIFEST.name;
+    let repoLink = MANIFEST.homepage_url;
+
+    var modNote =
+        `Mod Message: The sections, "${segmentsTimes} at ${framerate} fps" add up` +
+        `to a final time of "${totalTime}" Retimed using the ${extensionName} (${repoLink})`;
 
     return modNote;
 }
 
-function Time(hours, minutes, seconds, milliseconds) {
-    this.hours = hours;
-    this.minutes = minutes;
-    this.seconds = seconds;
-    this.milliseconds = milliseconds;
+function getSegmentsTimeSeparatedBy(separator) {
+    let segmentsTimeString = "";
+    let segmentsNodes = ELEMENTS.segmentsContainer.childNodes;
+
+    segmentsNodes.forEach((segmentNode, index) => {
+        let segment = segmentNode.segment;
+        let isLastSegment = index == segmentsNodes.length - 1;
+
+        segmentsTimeString +=
+            segment == undefined ? DEFAULT_TIME : segment.toString();
+
+        if (!isLastSegment) {
+            segmentsTimeString += ` ${separator} `;
+        }
+    });
+
+    return segmentsTimeString;
 }
 
-function Segment(startTime) {
-    this.startTime = startTime;
-    this.endTime = null;
-    this.time = new Time(0, 0, 0, 0);
-    this.getSeconds = function () {
-        return Math.abs(this.endTime - this.startTime);
-    };
-    this.toString = function () {
-        let time = this.calculateTime();
+async function resetAll() {
+    let accepted = await openWarningModal(
+        (message = WARNING_MESSAGES.resetAll)
+    );
 
-        if (time == undefined) {
-            return "00h 00m 00s 000ms";
+    if (!accepted) return;
+
+    setFramerate("");
+    setTime("0.0");
+
+    resetNodes();
+
+    ELEMENTS.calculatedTimeText.textContent = DEFAULT_TIME;
+    ELEMENTS.calculatedTimeText.segment = new Segment(0);
+
+    saveDataToLocalStorage();
+}
+
+function resetNodes() {
+    let segmentsNodes = getAllSegmentsNodes();
+
+    segmentsNodes.forEach((segment, index) => {
+        if (index != 0) {
+            segment.remove();
         }
+    });
 
-        return time;
+    let firstSegmentNode = segmentsNodes[0];
+
+    resetSegment(firstSegmentNode);
+
+    changeSelectedSection(firstSegmentNode);
+}
+
+function getSelectedSegmentNodeAndIndex() {
+    let segmentsNodes = getAllSegmentsNodes();
+
+    let selectedSegment = {
+        segmentNode: undefined,
+        index: undefined,
     };
-    this.calculateTime = function () {
-        var framerate = framerateInput.value;
 
-        if (framerate == 0) {
-            document.querySelector("#setTimeError").textContent =
-                "Framerate can't be 0";
+    for (let i = 0; i < segmentsNodes.length; i++) {
+        let segmentNode = segmentsNodes[i];
+
+        let isSelected =
+            segmentNode
+                .querySelector("#time-segment-btn")
+                .getAttribute("checked") == "true";
+
+        if (isSelected) {
+            selectedSegment = {
+                segmentNode: segmentNode,
+                index: i,
+            };
+            break;
+        }
+    }
+
+    return selectedSegment;
+}
+
+function loadSavedDataFromLocalStorage() {
+    chrome.storage.local.get(["timeData"], function (result) {
+        let timeData = result.timeData;
+
+        if (timeData == undefined) {
             return;
         }
 
-        if (framerate == "" || framerate == undefined || framerate == null) {
-            framerate = 60;
+        setData(timeData);
+    });
+}
+
+function setData(timeData) {
+    let segmentsLoaded = timeData.segments;
+    let framerateLoaded = timeData.framerate;
+    let actualTimeLoaded = timeData.textTime;
+    let calculatedSegmentLoaded = timeData.calculatedTime;
+    let selectedIndex = timeData.selectedIndex;
+
+    setTime(actualTimeLoaded);
+
+    setFramerate(
+        framerateLoaded == undefined || framerateLoaded == null
+            ? ""
+            : framerateLoaded
+    );
+
+    segmentsLoaded.forEach((segmentLoaded, index) => {
+        let segmentNode = ELEMENTS.segmentsContainer.childNodes[index];
+
+        if (segmentNode == undefined) {
+            addSegmentNode();
+
+            segmentNode = ELEMENTS.segmentsContainer.childNodes[index];
         }
 
-        var frames = Math.abs(this.getSeconds()) * framerate;
-        var horas = Math.floor(frames / (3600 * framerate));
-        var minutos = Math.floor(
-            (frames % (3600 * framerate)) / (60 * framerate)
-        );
-        var segundosRestantes = Math.floor(
-            (frames % (60 * framerate)) / framerate
-        );
-        var milisegundos = Math.floor(
-            (frames % framerate) * (1000 / framerate)
+        segmentNode.segment = new Segment(
+            segmentLoaded.startTime,
+            segmentLoaded.endTime
         );
 
-        var tiempoFormateado = "";
+        if (
+            segmentNode.segment.endTime != null &&
+            segmentNode.segment.startTime != null
+        ) {
+            setValue(segmentNode, segmentNode.segment.toString());
+        }
+    });
 
-        tiempoFormateado += horas.toString().padStart(2, "0") + "h ";
-        tiempoFormateado += minutos.toString().padStart(2, "0") + "m ";
-        tiempoFormateado +=
-            segundosRestantes.toString().padStart(2, "0") + "s ";
-        tiempoFormateado += milisegundos.toString().padStart(3, "0") + "ms";
+    changeSelectedSection(ELEMENTS.segmentsContainer.childNodes[selectedIndex]);
 
-        this.time = new Time(horas, minutos, segundosRestantes, milisegundos);
+    ELEMENTS.calculatedTimeText.segment = new Segment(
+        calculatedSegmentLoaded.startTime,
+        calculatedSegmentLoaded.endTime
+    );
 
-        return tiempoFormateado;
+    setCalculatedTime(timeData.calculatedTime);
+}
+
+function sendOpenedMessage() {
+    sendMessage(SEND_MESSAGES.openedExtension);
+}
+
+function openWarningModal(message) {
+    ELEMENTS.warningModal.querySelector("#warning-message").textContent =
+        message;
+
+    ELEMENTS.warningModal.style.visibility = "visible";
+    ELEMENTS.lock.style.visibility = "visible";
+
+    return new Promise((resolve, reject) => {
+        ELEMENTS.warningModal.querySelector("#warning-yes-btn").onclick =
+            () => {
+                resolve(true);
+                ELEMENTS.warningModal.style.visibility = "hidden";
+                ELEMENTS.lock.style.visibility = "hidden";
+            };
+        ELEMENTS.warningModal.querySelector("#warning-no-btn").onclick = () => {
+            resolve(false);
+            ELEMENTS.warningModal.style.visibility = "hidden";
+            ELEMENTS.lock.style.visibility = "hidden";
+        };
+    });
+}
+
+function addSegmentNode() {
+    let newSegmentNode = createSegmentNode();
+
+    ELEMENTS.segmentsContainer.appendChild(newSegmentNode);
+
+    changeSelectedSection(newSegmentNode);
+}
+
+function createSegmentNode() {
+    let segmentNode = ELEMENTS.segmentsContainer.childNodes[0].cloneNode(true);
+
+    segmentNode.querySelector("#remove-segment-btn").onclick = () => {
+        removeSegmentNode(segmentNode);
     };
+
+    segmentNode.querySelector("#reset-btn").onclick = () => {
+        resetSegmentBtnFunc(segmentNode.querySelector("#reset-btn"));
+    };
+
+    segmentNode.querySelector("#remove-segment-btn").style.visibility =
+        "visible";
+
+    segmentNode.querySelector("#time-segment-btn").onclick = () => {
+        changeSelectedSectionEvent(segmentNode);
+    };
+
+    resetSegment(segmentNode);
+
+    return segmentNode;
 }
 
-function resetAll() {
-    document.querySelector("#framerate").value = "";
-    var contenedores = document.querySelectorAll(".segment");
+// Segment Node Functions
 
-    timeText.value = "0.0";
+function resetSegment(segmentNode) {
+    segmentNode.segment = undefined;
+    segmentNode.querySelector("#segment-value").textContent = DEFAULT_TIME;
+}
 
-    for (let i = 1; i < contenedores.length; i++) {
-        const contenedor = contenedores[i];
+function unselectSegment(segmentNode) {
+    segmentNode
+        .querySelector("#time-segment-btn")
+        .setAttribute("checked", false);
+}
 
-        contenedor.remove();
-    }
+function selectSegment(segmentNode) {
+    segmentNode
+        .querySelector("#time-segment-btn")
+        .setAttribute("checked", true);
+}
 
-    contenedores[0].segment = undefined;
+function setValue(segmentNode, value) {
+    segmentNode.querySelector("#segment-value").textContent = value;
+}
 
-    contenedores[0].querySelector("#segment-value").textContent =
-        "00h 00m 00s 000ms";
-
-    changeSelectedInstance(document.querySelector("#time-segment-btn"));
-
-    calculatedTimeText.value = "00h 00m 00s 000ms";
-    calculatedTimeText.segment = new Segment(0);
-
+function resetSegmentBtnFunc(resetBtn) {
+    resetSegment(resetBtn.parentNode);
     saveDataToLocalStorage();
 }
 
-function resetBtnFunc(resetBtn) {
-    resetBtn.parentNode.querySelector("#segment-value").textContent =
-        "00h 00m 00s 000ms";
-    resetBtn.parentNode.segment = undefined;
+async function removeSegmentNode(segmentNode) {
+    if (segmentNode.segment == undefined) {
+        if (isSelected(segmentNode)) {
+            changeSelectedSection(segmentNode.previousSibling);
+        }
+        segmentNode.remove();
+        
+        return;
+    }
+    if (
+        segmentNode.segment.startTime != null ||
+        segmentNode.segment.endTime != null
+    ) {
+        let accepted = await openWarningModal(WARNING_MESSAGES.deleteSegment);
+
+        if (!accepted) return;
+    }
+    if (isSelected(segmentNode)) {
+        changeSelectedSection(segmentNode.previousSibling);
+    }
+
+    segmentNode.remove();
+
     saveDataToLocalStorage();
-}
-
-function getSelectedInstance() {
-    var segments = segmentsContainer.querySelectorAll("#time-segment-btn");
-
-    for (var i = 0; i < segments.length; i++) {
-        var input = segments[i];
-
-        // Verificar si el radio input está seleccionado
-
-        if (input.getAttribute("checked") == "true") {
-            // Obtener el contenedor más cercano con la clase "contenedor"
-            var contenedor = input.closest(".segment");
-
-            return contenedor;
-        }
-    }
-}
-
-function getSelectedInstanceIndex() {
-    var segments = segmentsContainer.querySelectorAll("#time-segment-btn");
-
-    for (var i = 0; i < segments.length; i++) {
-        var input = segments[i];
-
-        // Verificar si el radio input está seleccionado
-
-        if (input.getAttribute("checked") == "true") {
-            // Obtener el contenedor más cercano con la clase "contenedor"
-
-            return i;
-        }
-    }
-}
-
-window.onload = onLoad;
-
-function onLoad() {
-    calculatedTimeText.segment = new Segment(0);
-
-    getDataFromLocalStorage();
-    unselectAll();
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
-
-        chrome.tabs.sendMessage(
-            activeTabId,
-            { message: "openedExtension" },
-            async function (response) {}
-        );
-    });
-}
-
-function unselectAll() {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
-
-        chrome.tabs.sendMessage(
-            activeTabId,
-            { message: "unselect" },
-            async function (response) {}
-        );
-    });
-}
-
-function removeError() {
-    document.querySelector("#setTimeError").textContent = "";
-    document.querySelector("#setTimeError").style.color = "#ff3e30";
 }
 
 function saveDataToLocalStorage() {
     chrome.storage.local.set({ timeData: createSaveJSON() });
 }
 
-function getDataFromLocalStorage() {
-    chrome.storage.local.get(["timeData"], function (result) {
-        var obj = result.timeData;
+// JSON Functions
 
-        setData(obj);
+function getSegmentsJSON() {
+    let segmentsNodes = getAllSegmentsNodes();
 
-        var selected = result.timeData.selected;
+    let segments = [];
 
-        changeSelectedInstance(
-            segmentsContainer.childNodes[selected].querySelector(
-                "#time-segment-btn"
-            )
-        );
-    });
+    segmentsNodes.forEach((segmentNode) => {
+        let segment = segmentNode.segment;
 
-    setData(undefined);
-}
-
-function setData(timeData) {
-    if (timeData == undefined) {
-        return;
-    }
-
-    var segments = timeData.segments;
-    var framerate = timeData.framerate;
-    var textTime = timeData.textTime;
-
-    if (framerate == undefined) {
-        framerate = "";
-    }
-
-    document.querySelector("#framerate").value = framerate;
-
-    timeText.value = textTime;
-
-    if (segments.length == 0) {
-        return;
-    }
-
-    for (let i = 0; i < segments.length; i++) {
-        var segment = segments[i];
-        var childNode = segmentsContainer.childNodes[i];
-
-        if (childNode == undefined) {
-            addInstance();
-
-            childNode = segmentsContainer.childNodes[i];
+        if (segment == undefined) {
+            segment = new Segment(null);
         }
 
-        childNode.segment = new Segment(segment.startTime);
-
-        if (segment.endTime == null) {
-            continue;
-        }
-
-        childNode.segment.endTime = segment.endTime;
-
-        childNode.querySelector("#segment-value").textContent =
-            childNode.segment.toString();
-    }
-
-    calculatedTimeText.segment = new Segment(timeData.calculatedTime.startTime);
-    calculatedTimeText.segment.endTime = timeData.calculatedTime.endTime;
-    if (calculatedTimeText.segment.endTime != null) {
-        calculatedTimeText.value = calculatedTimeText.segment.toString();
-    }
-}
-
-function changeSelectedInstance(timeInput) {
-    segmentsContainer
-        .querySelectorAll("#time-segment-btn")
-        .forEach((button) => {
-            button.setAttribute("checked", false);
-        });
-
-    timeInput.setAttribute("checked", true);
-    saveDataToLocalStorage();
-}
-
-function openWarning(isStart, newTime, contenedor) {
-    document.querySelector("#warning").style.visibility = "visible";
-    document.querySelector("#lock").style.visibility = "visible";
-
-    document.querySelector("#warning-text").textContent =
-        "Are you sure you want to overwrite the time?";
-
-    let warningYes = document.querySelector("#warning-yes-btn");
-    let warningNo = document.querySelector("#warning-no-btn");
-
-    warningYes.addEventListener("click", () => {
-        if (isStart) {
-            contenedor.segment.startTime = newTime;
-            document.querySelector("#setTimeError").textContent =
-                "A start time has been set.";
-            document.querySelector("#setTimeError").style.color = "#0067dd";
-        } else {
-            contenedor.segment.endTime = newTime;
-            document.querySelector("#setTimeError").textContent =
-                "A end time has been set.";
-            document.querySelector("#setTimeError").style.color = "#0067dd";
-        }
-
-        if (contenedor.segment.endTime != null) {
-            contenedor.querySelector("#segment-value").textContent =
-                contenedor.segment.toString();
-        }
-
-        document.querySelector("#warning").style.visibility = "hidden";
-        document.querySelector("#lock").style.visibility = "hidden";
-
-        warningYes.removeEventListener("click", () => {});
-        saveDataToLocalStorage();
+        segments.push(segment);
     });
 
-    warningNo.addEventListener("click", () => {
-        document.querySelector("#warning").style.visibility = "hidden";
-        document.querySelector("#lock").style.visibility = "hidden";
-
-        warningNo.removeEventListener("click", () => {});
-    });
-}
-
-function openWarningResetAll() {
-    document.querySelector("#warning").style.visibility = "visible";
-    document.querySelector("#lock").style.visibility = "visible";
-
-    document.querySelector("#warning-text").textContent =
-        "Are you sure you want to reset all the data?";
-
-    let warningYes = document.querySelector("#warning-yes-btn");
-    let warningNo = document.querySelector("#warning-no-btn");
-
-    warningYes.addEventListener("click", () => {
-        resetAll();
-
-        document.querySelector("#warning").style.visibility = "hidden";
-        document.querySelector("#lock").style.visibility = "hidden";
-
-        warningYes.removeEventListener("click", () => {});
-        saveDataToLocalStorage();
-    });
-
-    warningNo.addEventListener("click", () => {
-        document.querySelector("#warning").style.visibility = "hidden";
-        document.querySelector("#lock").style.visibility = "hidden";
-
-        warningNo.removeEventListener("click", () => {});
-    });
-}
-
-// ------------- Create JSON ----------------
-
-function getAllSegments() {
-    var contenedores = document.querySelectorAll(".segment");
-
-    var obj = [];
-
-    for (let i = 0; i < contenedores.length; i++) {
-        const contenedor = contenedores[i];
-
-        var segment = contenedor.segment;
-
-        if (segment == null) {
-            var objSegment = {
-                startTime: null,
-                endTime: null,
-            };
-
-            obj.push(objSegment);
-            continue;
-        }
-
-        var objSegment = {
-            startTime: segment.startTime,
-            endTime: segment.endTime,
-        };
-
-        obj.push(objSegment);
-    }
-
-    return obj;
+    return segments;
 }
 
 function createSaveJSON() {
-    var obj = getAllSegments();
-    var framerate = document.querySelector("#framerate").value;
+    let segments = getSegmentsJSON();
+    let framerate = ELEMENTS.framerateInput.value;
 
-    if (isNaN(framerate)) {
+    try {
+        checkFramerate(framerate);
+    } catch (error) {
         framerate = "";
     }
 
-    var jsonObj = {
-        selected: getSelectedInstanceIndex(),
+    let textTime = getTime();
+    let calculatedTime = getCalculatedTime();
+    let selectedIndex = getSelectedSegmentNodeAndIndex().index;
+
+    let timeData = {
+        selectedIndex: selectedIndex,
+        segments: segments,
         framerate: framerate,
-        segments: obj,
-        textTime: timeText.value,
-        calculatedTime: calculatedTimeText.segment,
+        textTime: textTime,
+        calculatedTime: calculatedTime,
     };
 
-    return jsonObj;
+    return timeData;
 }
 
-//----------------- Calculate Time -----------------
+// Execution
+window.onload = executeOnLoad();
 
-function calculateTotalTime() {
-    var totalSeconds = 0;
+function executeOnLoad() {
+    ELEMENTS.calculatedTimeText.segment = new Segment(0);
 
-    var segments = document.querySelectorAll(".segment");
+    loadSavedDataFromLocalStorage();
 
-    var totalSegment = new Segment(0);
-
-    for (let i = 0; i < segments.length; i++) {
-        let segment = segments[i].segment;
-
-        if (segment == undefined) {
-            continue;
-        }
-
-        var seconds = segment.getSeconds();
-
-        if (seconds == null || seconds == undefined || seconds < 0) {
-            continue;
-        }
-
-        totalSeconds += segment.getSeconds();
-    }
-
-    totalSegment.endTime = totalSeconds;
-
-    calculatedTimeText.segment = totalSegment;
-
-    return totalSegment;
+    sendOpenedMessage();
 }
 
-calculateBtn.addEventListener("click", () => {
-    if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate must be a number.";
-        framerateInput.value = "";
-        return;
-    }
-    calculatedTimeText.value = calculateTotalTime().toString();
+// Event Listeners
+
+BUTTONS.calculateBtn.addEventListener("click", () => {
+    let totalSum = calculateTotalSumOfSegments();
+
+    let stringTime = totalSum.toString();
+
+    setCalculatedTime(stringTime);
+
     saveDataToLocalStorage();
 });
 
-// ----------------- Add Instance -----------------
+BUTTONS.copyBtn.addEventListener("click", () => {
+    removeWarning();
+    let calculatedTime = calculateTotalSumOfSegments().toString();
 
-function addInstance() {
-    // Crear los elementos para la nueva instancia
-    var removeButton = document.createElement("button");
-
-    var removeImg = document.createElement("img");
-
-    removeImg.src = "icons/remove.png";
-
-    removeButton.appendChild(removeImg);
-
-    removeButton.classList.add("icon");
-
-    // Configurar los atributos y contenido de los elementos
-    var newChild = segmentsContainer.childNodes[0].cloneNode(true);
-
-    var resetBtn = newChild.querySelector("#reset-btn");
-
-    resetBtn.addEventListener("click", () => {
-        resetBtnFunc(resetBtn);
-    });
-
-    newChild.segment = undefined;
-    newChild.querySelector("#segment-value").textContent = "00h 00m 00s 000ms";
-
-    //timeInput.type = "text";
-
-    newChild
-        .querySelector("#time-segment-btn")
-        .addEventListener("click", () => {
-            changeSelectedInstance(newChild.querySelector("#time-segment-btn"));
-        });
-
-    changeSelectedInstance(newChild.querySelector("#time-segment-btn"));
-
-    //timeInput.disabled = true;
-
-    removeButton.addEventListener("click", () => {
-        if (
-            newChild
-                .querySelector("#time-segment-btn")
-                .getAttribute("checked") == "true"
-        ) {
-            changeSelectedInstance(
-                newChild.previousElementSibling.querySelector(
-                    "#time-segment-btn"
-                )
-            );
-        }
-
-        newChild.remove();
-        saveDataToLocalStorage();
-    });
-
-    // Agregar los elementos al contenedor principal
-    segmentsContainer.appendChild(newChild);
-
-    newChild.appendChild(removeButton);
-
-    // Obtener el contenedor de instancias y agregar la nueva instancia
-}
-
-// ----------------- Event Listeners -----------------
-
-copyBtn.addEventListener("click", () => {
-    removeError();
-    var text = calculatedTimeText.value;
-    navigator.clipboard.writeText(text).then(function () {
-        document.querySelector("#setTimeError").textContent =
-            "Copied to clipboard";
-        document.querySelector("#setTimeError").style.color = "#00ae52";
-    });
-});
-
-addBtn.addEventListener("click", () => {
-    removeError();
-    addInstance();
-    saveDataToLocalStorage();
-});
-
-resetAllBtn.addEventListener("click", () => {
-    removeError();
-
-    openWarningResetAll();
-});
-
-resetBtn.addEventListener("click", () => {
-    removeError();
-    resetBtnFunc(resetBtn);
-});
-
-getExactTimeBtn.addEventListener("click", () => {
-    removeError();
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
-
-        chrome.tabs.sendMessage(
-            activeTabId,
-            { message: "getExactTime", videoId: 0 },
-            async function (response) {
-                timeText.value = response.time;
-            }
+    navigator.clipboard.writeText(calculatedTime).then(() => {
+        setNotificationMessage(
+            NOTIFICATION_MESSAGES.copied,
+            NOTIFICATION_COLORS.success,
+            false
         );
     });
+
     saveDataToLocalStorage();
 });
 
-sendBtn.addEventListener("click", () => {
-    removeError();
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
-
-        var calculatedTime = calculatedTimeText.segment;
-
-        var time = calculatedTime.time;
-
-        chrome.tabs.sendMessage(
-            activeTabId,
-            { message: "setTime", time: time },
-            async function (response) {
-                console.log(response.message);
-            }
-        );
-    });
+BUTTONS.addSegmentBtn.addEventListener("click", () => {
+    removeWarning();
+    addSegmentNode();
+    saveDataToLocalStorage();
 });
 
-startTimeBtn.addEventListener("click", () => {
-    removeError();
+BUTTONS.resetAllBtn.addEventListener("click", () => {
+    removeWarning();
+    resetAll();
+    saveDataToLocalStorage();
+});
 
-    if (timeText.value.trim() == "" || timeText.value == "0.0") {
-        document.querySelector("#setTimeError").textContent =
-            "You have not selected a second.";
+BUTTONS.resetFirstSegmentBtn.addEventListener("click", () => {
+    removeWarning();
+    let firstSegmentNode = ELEMENTS.segmentsContainer.childNodes[0];
+    resetSegmentBtnFunc(firstSegmentNode.querySelector("#reset-btn"));
+    saveDataToLocalStorage();
+});
 
-        return;
+BUTTONS.getExactTimeBtn.addEventListener("click", async () => {
+    removeWarning();
+    let response = await sendMessage(SEND_MESSAGES.getExactTime);
+    let fps = getFramerate();
+    fps = checkFramerate(fps);
+    let time = Math.floor(response.time * fps) / fps;
+    setTime(time);
+    saveDataToLocalStorage();
+});
+
+BUTTONS.sendToSRCBtn.addEventListener("click", () => {
+    removeWarning();
+
+    sendMessage(SEND_MESSAGES.sendToSRC, getCalculatedTimeObject());
+    saveDataToLocalStorage();
+});
+
+BUTTONS.setStartTimeBtn.addEventListener("click", async () => {
+    removeWarning();
+
+    let time = getTime();
+    let framerate = getFramerate();
+
+    checkTime(time);
+    checkFramerate(framerate);
+
+    let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;
+
+    let segment = selectedSegmentNode.segment;
+
+    let isSameTime = segment != undefined && segment.startTime == time;
+
+    if (segment == undefined || segment.startTime == null) {
+        segment = new Segment(0);
+    } else {
+        if (isSameTime) return;
+
+        let accepted = await openWarningModal(
+            WARNING_MESSAGES.overwritingStartTime
+        );
+
+        if (!accepted) return;
     }
 
-    var contenedor = getSelectedInstance();
+    let hasEndTime = segment.endTime != null;
 
-    if (contenedor == null) {
-        document.querySelector("#setTimeError").textContent =
-            "No segment selected.";
-        return;
+    segment.startTime = time;
+    selectedSegmentNode.segment = segment;
+
+    setNotificationMessage(
+        NOTIFICATION_MESSAGES.startTimeSaved,
+        NOTIFICATION_COLORS.visualOutput,
+        false
+    );
+
+    if (hasEndTime) {
+        setValue(selectedSegmentNode, segment.toString());
     }
 
-    if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate must be a number.";
-        framerateInput.value = "";
-        return;
-    }
+    saveDataToLocalStorage();
+});
 
-    if (framerateInput.value <= 0 || framerateInput.value == "") {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate cannot be 0 or lower.";
-        framerateInput.value = "";
-        return;
-    }
+BUTTONS.setEndTimeBtn.addEventListener("click", async () => {
+    let time = getTime();
+    let framerate = getFramerate();
 
-    if (isNaN(timeText.value)) {
-        document.querySelector("#setTimeError").textContent =
-            "The time must be a number.";
-        timeText.value = "0.0";
-        return;
-    }
+    checkTime(time);
+    checkFramerate(framerate);
+    debugger;
+
+    let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;
+
+    let segment = selectedSegmentNode.segment;
+
+    let isSameTime = segment != undefined && segment.endTime == time;
+
+    let isSameTimeAsStartTime =
+        parseFloat(segment.startTime) == parseFloat(segment.endTime);
 
     if (
-        contenedor.segment != undefined &&
-        contenedor.segment.startTime != null
+        segment == undefined ||
+        segment.endTime == null ||
+        isSameTimeAsStartTime
     ) {
-        if (contenedor.segment.startTime == timeText.value) {
-            return;
-        }
-        openWarning(true, timeText.value, contenedor);
+        segment.endTime = time;
     } else {
-        var segment = new Segment(timeText.value);
+        if (isSameTime) return;
 
-        contenedor.segment = segment;
+        let accepted = await openWarningModal(
+            WARNING_MESSAGES.overwritingEndTime
+        );
 
-        document.querySelector("#setTimeError").textContent =
-            "A start time has been set.";
-        document.querySelector("#setTimeError").style.color = "#0067dd";
+        if (!accepted) return;
     }
 
-    if (contenedor.segment.endTime != null) {
-        contenedor.querySelector("#segment-value").textContent =
-            contenedor.segment.toString();
+    let hasStartTime = segment.startTime != null;
+
+    segment.endTime = time;
+    selectedSegmentNode.segment = segment;
+
+    setNotificationMessage(
+        NOTIFICATION_MESSAGES.endTimeSaved,
+        NOTIFICATION_COLORS.visualOutput,
+        false
+    );
+
+    if (hasStartTime) {
+        setValue(selectedSegmentNode, segment.toString());
     }
 
     saveDataToLocalStorage();
 });
 
-endTimerBtn.addEventListener("click", () => {
-    removeError();
-    var contenedor = getSelectedInstance();
-
-    if (contenedor == null) {
-        document.querySelector("#setTimeError").textContent =
-            "No segment selected";
-        return;
-    }
-
-    var segment = contenedor.segment;
-    if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate must be a number.";
-        framerateInput.value = "";
-        return;
-    }
-
-    if (framerateInput.value <= 0 || framerateInput.value == "") {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate cannot be 0 or lower.";
-        framerateInput.value = "";
-        return;
-    }
-
-    if (segment == null || segment.startTime == null) {
-        document.querySelector("#setTimeError").textContent =
-            "The selected segment does not have a start time";
-        return;
-    }
-
-    if (isNaN(timeText.value)) {
-        document.querySelector("#setTimeError").textContent =
-            "The time must be a number.";
-        timeText.value = "0.0";
-        return;
-    }
-
-    if (segment.endTime == timeText.value) {
-        saveDataToLocalStorage();
-
-        return;
-    }
-
-    if (
-        segment.endTime != null &&
-        segment.endTime != undefined &&
-        segment.startTime != segment.endTime
-    ) {
-        if (segment.endTime == timeText.value) {
-            return;
-        }
-
-        openWarning(false, timeText.value, contenedor);
-    } else {
-        segment.endTime = timeText.value;
-        document.querySelector("#setTimeError").textContent =
-            "A end time has been set.";
-        document.querySelector("#setTimeError").style.color = "#0067dd";
-    }
-
-    contenedor.querySelector("#segment-value").textContent =
-        contenedor.segment.toString();
-
+BUTTONS.changeSRCTimeInputBtn.addEventListener("click", () => {
+    removeWarning();
+    sendMessage(SEND_MESSAGES.changeSelectedInput);
     saveDataToLocalStorage();
 });
 
-changeInput.addEventListener("click", () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
+BUTTONS.firstTimeInput.addEventListener("click", () => {
+    changeSelectedSectionEvent(ELEMENTS.segmentsContainer.childNodes[0]);
+});
 
-        chrome.tabs.sendMessage(
-            activeTabId,
-            { message: "changeSelectedInput" },
-            async function (response) {}
+function changeSelectedSectionEvent(segmentNode) {
+    removeWarning();
+    changeSelectedSection(segmentNode);
+    saveDataToLocalStorage();
+}
+
+BUTTONS.setFramerateTo60Btn.addEventListener("click", () => {
+    removeWarning();
+    setFramerate(60);
+    saveDataToLocalStorage();
+});
+
+BUTTONS.setFramerateTo30Btn.addEventListener("click", () => {
+    removeWarning();
+    setFramerate(30);
+    saveDataToLocalStorage();
+});
+
+BUTTONS.copyModNoteBtn.addEventListener("click", () => {
+    removeWarning();
+    let modNote = generateModNote();
+
+    navigator.clipboard.writeText(modNote).then(() => {
+        setNotificationMessage(
+            NOTIFICATION_MESSAGES.copied,
+            NOTIFICATION_COLORS.success,
+            false
         );
     });
-});
 
-timeInput.addEventListener("click", () => {
-    changeSelectedInstance(timeInput);
-});
-
-framerateInput.addEventListener("change", () => {
-    if (framerateInput.value <= 0) {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate cannot be 0 or lower.";
-        framerateInput.value = "";
-    }
     saveDataToLocalStorage();
 });
 
-setFramerateTo30.addEventListener("click", () => {
-    removeError();
-    framerateInput.value = 30;
-    saveDataToLocalStorage();
+ELEMENTS.lock.addEventListener("click", () => {
+    ELEMENTS.warningModal.querySelector("#warning-no-btn").click();
 });
 
-setFramerateTo60.addEventListener("click", () => {
-    removeError();
-
-    framerateInput.value = 60;
-    saveDataToLocalStorage();
-});
-
-modNoteBtn.addEventListener("click", () => {
-    removeError();
-
-    if (isNaN(framerateInput.value)) {
-        document.querySelector("#setTimeError").textContent =
-            "The framerate must be a number.";
-        framerateInput.value = "";
-        return;
-    }
-
-    var modNote = generateModNote();
-
-    if (modNote == undefined) {
-        return;
-    }
-
-    navigator.clipboard.writeText(modNote).then(function () {
-        document.querySelector("#setTimeError").textContent =
-            "Copied to clipboard";
-        document.querySelector("#setTimeError").style.color = "#00ae52";
-    });
-});
-
-lock.addEventListener("click", () => {
-    removeError();
-
-    document.querySelector("#warning").style.visibility = "hidden";
-    document.querySelector("#lock").style.visibility = "hidden";
-
-    warningYes.removeEventListener("click", () => {});
-});
-// ----------------- Execute -----------------
-
-timeInput.setAttribute("checked", true);
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+ELEMENTS.segmentsContainer.childNodes[0].setAttribute("checked", true);

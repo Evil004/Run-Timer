@@ -140,7 +140,7 @@ input[type="text"] {
     vertical-align: middle;
 }
 
-#setTimeError {
+#notification-message {
     margin: 0px;
     font-family: Arial, Helvetica, sans-serif;
     color: #ff0000;
