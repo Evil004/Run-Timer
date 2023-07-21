@@ -661,7 +661,10 @@ BUTTONS.getExactTimeBtn.addEventListener("click", async () => {
 BUTTONS.sendToSRCBtn.addEventListener("click", () => {
     removeWarning();
 
-    sendMessage(SEND_MESSAGES.sendToSRC, getCalculatedTimeObject());
+    let time = calculateTotalSumOfSegments().toString();
+    let timeObject = calculateTotalSumOfSegments().getTime();
+
+    sendMessage(SEND_MESSAGES.setTime, timeObject);
     saveDataToLocalStorage();
 });
 

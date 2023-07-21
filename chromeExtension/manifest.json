@@ -26,5 +26,5 @@
         }
     ],
 
-    "host_permissions": ["<all_urls>"]
+    "host_permissions": ["https://www.youtube.com/*", "https://youtu.be/*", "https://www.speedrun.com/*"]
 }
