@@ -3,6 +3,11 @@ var selectedInput = {
     index: 0,
 };
 
+function triggerChangeEvent(element) {
+    var event = new Event("change", { bubbles: true });
+    element.dispatchEvent(event);
+}
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.message === "openedExtension") {
         unselectAllTimeInputs();
@@ -58,9 +63,14 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             let milliseconds = request.extraData.milliseconds;
 
             hourInput.value = hours;
+            triggerChangeEvent(hourInput);
             minuteInput.value = minutes;
+            triggerChangeEvent(minuteInput);
             secondInput.value = seconds;
+            triggerChangeEvent(secondInput);
             millisecondInput.value = milliseconds;
+
+            triggerChangeEvent(millisecondInput);
 
             sendResponse({ message: "success" });
         } catch (error) {
