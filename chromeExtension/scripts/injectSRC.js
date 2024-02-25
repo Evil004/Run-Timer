@@ -69,7 +69,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             secondInput.value = seconds;
             triggerChangeEvent(secondInput);
             millisecondInput.value = milliseconds;
-
             triggerChangeEvent(millisecondInput);
 
             sendResponse({ message: "success" });
