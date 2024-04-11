@@ -13,8 +13,8 @@
     "permissions": ["storage"],
     "content_scripts": [
         {
-            "matches": ["https://www.youtube.com/*", "https://youtu.be/*"],
-            "js": ["scripts/injectYT.js"],
+            "matches": ["https://www.youtube.com/*", "https://youtu.be/*", "https://player.twitch.tv/*", "https://www.twitch.tv/*"],
+            "js": ["scripts/injectToVideoPlayer.js"],
 
             "all_frames": true
         },
