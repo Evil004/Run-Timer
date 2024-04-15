@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Run-Timer",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A efficient tool used for retiming youtube and twitch videos.",
     "homepage_url": "https://github.com/Evil004/Run-Timer",
     "icons": {
