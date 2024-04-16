@@ -4,7 +4,7 @@
 ![Run-Timer Logo](./.github/imgs/Run-Timer_Baner.png)
 
 Run-Timer is a tool for moderators who need to retime Speedruns. This tool is optimized to readjust the timing in a simple and efficient manner.
-At this time, we provide a [Chrome Extension](https://chrome.google.com/webstore/detail/youtube-run-timer/gcdiionngbcoanblolafbnhkfpmoagnj/) and a [Firefox Addon](https://addons.mozilla.org/es/firefox/addon/run-timer/).
+At this time, we provide a [Chrome Extension](https://chromewebstore.google.com/detail/run-timer/gcdiionngbcoanblolafbnhkfpmoagnj) and a [Firefox Addon](https://addons.mozilla.org/es/firefox/addon/run-timer/).
 
 ## More info and user manual [here](https://github.com/Evil004/Run-Timer/wiki)
 
