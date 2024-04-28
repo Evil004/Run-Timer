@@ -20,7 +20,7 @@
         },
         {
             "matches": ["https://www.speedrun.com/*"],
-            "js": ["scripts/injectSRC.js"],
+            "js": ["scripts/injectToSRC.js"],
 
             "all_frames": true
         }
