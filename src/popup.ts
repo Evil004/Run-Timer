@@ -1,140 +1,18 @@
-const DEFAULT_FRAMERATE = 60;
-const MANIFEST = chrome.runtime.getManifest();
-const DEFAULT_TIME = "00h 00m 00s 000ms";
-
-const NOTIFICATION_MESSAGES = {
-    framerateIsNaN: "Framerate must be a number",
-    framerateIsEmpty: "Framerate cannot be empty",
-    framerateUnderOrEqual0: "Framerate cannot be under 0",
-    copied: "Copied to ClipBoard!",
-    timeIsEmpty: "Time cannot be empty",
-    noSegmentSelected: "No segment selected",
-    timeIsNaN: "Time must be a number",
-    timeUnder0: "Time cannot be under 0",
-    startTimeSaved: "Start time saved!",
-    endTimeSaved: "End time saved!",
-};
-
-const SEND_MESSAGES = {
-    openedExtension: "openedExtension",
-    changeSelectedInput: "changeSelectedInput",
-    setTime: "setTime",
-    getExactTime: "getExactTime",
-};
-
-const NOTIFICATION_COLORS = {
-    error: "#ff3e30",
-    success: "#00ae52",
-    visualOutput: "#0067dd",
-};
-
-const WARNING_MESSAGES = {
-    overwritingStartTime: "Are you sure you want to overwrite the start time?",
-    overwritingEndTime: "Are you sure you want to overwrite the end time?",
-    resetAll: "Are you sure you want to reset all?",
-    deleteSegment: "Are you sure you want to delete this segment?",
-};
-
-const ELEMENTS = {
-    framerateInput: document.querySelector("#framerate"),
-    timeText: document.querySelector("#time-text"),
-    errorMessage: document.querySelector("#notification-message"),
-    segmentsContainer: document.querySelector("#segments-container"),
-    calculatedTimeText: document.querySelector("#calculated-time"),
-    warningModal: document.querySelector("#warning"),
-    lock: document.querySelector("#lock"),
-};
-
-const BUTTONS = {
-    calculateBtn: document.querySelector("#calculate-btn"),
-    copyBtn: document.querySelector("#copy-btn"),
-    addSegmentBtn: document.querySelector("#add-segment-btn"),
-    resetAllBtn: document.querySelector("#reset-all-btn"),
-    resetFirstSegmentBtn: document.querySelector("#reset-btn"),
-    firstTimeInput: document.querySelector("#time-segment-btn"),
-    getExactTimeBtn: document.querySelector("#exact-time-btn"),
-    sendToSRCBtn: document.querySelector("#send-btn"),
-    setStartTimeBtn: document.querySelector("#start-time-btn"),
-    setEndTimeBtn: document.querySelector("#end-time-btn"),
-    changeSRCTimeInputBtn: document.querySelector("#change-input-btn"),
-    setFramerateTo60Btn: document.querySelector("#sixty-framerate-btn"),
-    setFramerateTo30Btn: document.querySelector("#thirty-framerate-btn"),
-    copyModNoteBtn: document.querySelector("#copy-mod-note-btn"),
-};
-
-// Classes
-
-class Time {
-    constructor(hours, minutes, seconds, milliseconds) {
-        this.hours = hours;
-        this.minutes = minutes;
-        this.seconds = seconds;
-        this.milliseconds = milliseconds;
-    }
-}
-
-class Segment {
-    constructor(startTime, endTime = null) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.time = new Time();
-    }
-
-    getFrames() {
-        return Math.abs(this.endTime - this.startTime);
-    }
-
-    calculateTime() {
-        let framerate = getFramerate();
-
-        checkFramerate(framerate);
-
-        let frames = this.getFrames();
-        let hours = Math.floor(frames / 3600);
-        let minutes = Math.floor((frames % 3600) / 60);
-        let seconds = Math.floor(frames % 60);
-        let milliseconds = Math.floor(((frames % framerate) - Math.floor(frames % framerate)) * 1000);
-
-        this.time = new Time(hours, minutes, seconds, milliseconds);
-    }
-
-    getTime() {
-        this.calculateTime();
-
-        return this.time;
-    }
-
-    toString() {
-        let time = this.getTime();
-        let hours = time.hours.toString().padStart(2, "0");
-        let minutes = time.minutes.toString().padStart(2, "0");
-        let seconds = time.seconds.toString().padStart(2, "0");
-        let milliseconds = time.milliseconds.toString().padStart(3, "0");
-
-        return `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
-    }
-}
 
 // General Functions
-
-function getFramerate() {
-    let framerate = ELEMENTS.framerateInput.value;
-
+function getFramerate(): number {
+    let framerate = Number(ELEMENTS.framerateInput.value);
     try {
-        framerate = checkFramerate(framerate);
+        framerate = isFramerateValid(framerate) ? framerate : DEFAULT_FRAMERATE;
     } catch (error) {
-        ELEMENTS.framerateInput.value = "";
-        return;
+        setNotificationMessage(NOTIFICATION_MESSAGES.framerateIsNaN);
+        framerate = DEFAULT_FRAMERATE;
     }
 
     return framerate;
 }
 
-function checkFramerate(framerate) {
-    if (framerate == "" || framerate == undefined || framerate == null) {
-        framerate = DEFAULT_FRAMERATE;
-    }
-
+function isFramerateValid(framerate: number): boolean {
     if (isNaN(framerate)) {
         setNotificationMessage(NOTIFICATION_MESSAGES.framerateIsNaN);
     }
@@ -143,32 +21,32 @@ function checkFramerate(framerate) {
         setNotificationMessage(NOTIFICATION_MESSAGES.framerateUnderOrEqual0);
     }
 
-    return framerate;
+    return true;
 }
 
-function checkTime(time) {
-    if (time == "" || time == undefined || time == null) {
-        setNotificationMessage(NOTIFICATION_MESSAGES.timeIsEmpty);
-    }
-
+function isTimeValid(time: number): boolean {
     if (isNaN(time)) {
         setNotificationMessage(NOTIFICATION_MESSAGES.timeIsNaN);
+        return false;
     }
 
     if (time < 0) {
         setNotificationMessage(NOTIFICATION_MESSAGES.timeUnder0);
+        return false;
     }
+
+    return true;
 }
 
 function setNotificationMessage(
-    message,
+    message: string,
     color = NOTIFICATION_COLORS.error,
     throwException = true
 ) {
     ELEMENTS.errorMessage.textContent = message;
     ELEMENTS.errorMessage.style.color = color;
     if (throwException) {
-        throw new Error(NOTIFICATION_MESSAGES.framerateIsNaN);
+        throw new Error(message);
     }
 }
 
@@ -213,12 +91,12 @@ function getAllSegmentsNodes() {
     return segmentsNodes;
 }
 
-function getTime() {
-    return ELEMENTS.timeText.value;
+function getVideoTime(): number {
+    return parseFloat(ELEMENTS.videoTimeInput.value);
 }
 
 function setTime(time) {
-    ELEMENTS.timeText.value = time;
+    ELEMENTS.videoTimeInput.value = time;
 }
 
 function setFramerate(framerate) {
@@ -272,7 +150,7 @@ function generateModNote() {
 
     let framerate = ELEMENTS.framerateInput.value;
     try {
-        framerate = checkFramerate(framerate);
+        framerate = isFramerateValid(framerate);
     } catch (error) {
         framerate = 60;
     }
@@ -519,7 +397,7 @@ async function removeSegmentNode(segmentNode) {
             changeSelectedSection(segmentNode.previousSibling);
         }
         segmentNode.remove();
-        
+
         return;
     }
     if (
@@ -568,12 +446,12 @@ function createSaveJSON() {
     let framerate = ELEMENTS.framerateInput.value;
 
     try {
-        checkFramerate(framerate);
+        isFramerateValid(framerate);
     } catch (error) {
         framerate = "";
     }
 
-    let textTime = getTime();
+    let textTime = getVideoTime();
     let calculatedTime = getCalculatedTime();
     let selectedIndex = getSelectedSegmentNodeAndIndex().index;
 
@@ -649,7 +527,7 @@ BUTTONS.getExactTimeBtn.addEventListener("click", async () => {
     removeWarning();
     let response = await sendMessage(SEND_MESSAGES.getExactTime);
     let fps = getFramerate();
-    fps = checkFramerate(fps);
+    fps = isFramerateValid(fps);
     let time = Math.floor(response.time * fps) / fps;
     setTime(time);
     saveDataToLocalStorage();
@@ -659,7 +537,7 @@ BUTTONS.sendToSRCBtn.addEventListener("click", () => {
     removeWarning();
 
     let time = calculateTotalSumOfSegments().toString();
-    let timeObject = calculateTotalSumOfSegments().getTime();
+    let timeObject = calculateTotalSumOfSegments().getCalculatedTime();
 
     sendMessage(SEND_MESSAGES.setTime, timeObject);
     saveDataToLocalStorage();
@@ -668,11 +546,11 @@ BUTTONS.sendToSRCBtn.addEventListener("click", () => {
 BUTTONS.setStartTimeBtn.addEventListener("click", async () => {
     removeWarning();
 
-    let time = getTime();
+    let time = getVideoTime();
     let framerate = getFramerate();
 
-    checkTime(time);
-    checkFramerate(framerate);
+    isTimeValid(time);
+    isFramerateValid(framerate);
 
     let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;
 
@@ -711,11 +589,11 @@ BUTTONS.setStartTimeBtn.addEventListener("click", async () => {
 });
 
 BUTTONS.setEndTimeBtn.addEventListener("click", async () => {
-    let time = getTime();
+    let time = getVideoTime();
     let framerate = getFramerate();
 
-    checkTime(time);
-    checkFramerate(framerate);
+    isTimeValid(time);
+    isFramerateValid(framerate);
     debugger;
 
     let selectedSegmentNode = getSelectedSegmentNodeAndIndex().segmentNode;

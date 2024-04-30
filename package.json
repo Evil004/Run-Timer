@@ -1,0 +1,27 @@
+{
+  "name": "tun-timer",
+  "version": "1.0.3",
+  "description": "![Run-Timer Logo](./.github/imgs/Run-Timer_Baner.png)",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Evil004/Run-Timer.git"
+  },
+  "author": "Evil & Nia",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Evil004/Run-Timer/issues"
+  },
+  "homepage": "https://github.com/Evil004/Run-Timer#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.0.267",
+    "@types/firefox-webext-browser": "^120.0.3",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
