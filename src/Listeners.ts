@@ -2,14 +2,30 @@ let browserAction = new ScriptsComunicator();
 let browsera = BrowserFactory.getBrowser();
 
 window.onload = async () => {
-    let loaded = await browsera.getFromStorage("test");
+    let response = await browsera.getFromStorage("data")
+
+    restoreData(response.data)
+
     browserAction.sendOpenedExtensionMessage()
 }
 
-window.onclose = async () => {
-    browsera.setToStorage("test", "testValue");
-}
+document.addEventListener("change", saveOnChange);
+document.addEventListener("click", saveOnChange);
+document.addEventListener("input", saveOnChange);
 
+
+BUTTONS.resetAllBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (confirm("Are you sure you want to reset all?")) {
+        ELEMENTS.framerateInput.value = "";
+        ELEMENTS.videoTimeInput.value = "0.0";
+        segmentList.clearSegments();
+        segmentList.generateDefaultSegment();
+
+
+        browsera.removeFromStorage("data");
+    }
+});
 
 BUTTONS.addSegmentBtn.addEventListener('click', async (e) => {
     segmentList.addSegment(HTMLSegmentFactory.createSegmentElement(new Segment(0)));

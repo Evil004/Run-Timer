@@ -3,7 +3,9 @@ interface Browser {
 
     getFromStorage(key: string): Promise<any>;
 
-    setToStorage(key: string, value: any): void
+    setToStorage(key: string, value: any): void;
+
+    removeFromStorage(key: string): void;
 }
 
 class ChromeBrowser implements Browser {
@@ -44,6 +46,13 @@ class ChromeBrowser implements Browser {
 
         chrome.storage.local.set({[key]: value});
     }
+
+    removeFromStorage(key: string): void {
+        chrome.storage.local.remove(key).catch((error) => {
+            console.log(error);
+
+        });
+    }
 }
 
 class FirefoxBrowser implements Browser {
@@ -81,6 +90,10 @@ class FirefoxBrowser implements Browser {
 
     setToStorage(key: string, value: any): void {
         browser.storage.local.set({[key]: value});
+    }
+
+    removeFromStorage(key: string): void {
+        browser.storage.local.remove(key);
     }
 }
 

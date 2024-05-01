@@ -88,8 +88,3 @@ const BUTTONS:{
 
 
 
-// @ts-ignore
-function getFramerate(){
-    let framerate = parseFloat(ELEMENTS.framerateInput.value);
-    return isNaN(framerate) ? DEFAULT_FRAMERATE : framerate;
-}

@@ -31,35 +31,36 @@ class Time {
 }
 
 class Segment {
-    private startTime: number;
-    private endTime: number | null;
-    private time: Time;
+    private _startTime: number;
+    private _endTime: number | null;
+    private _time: Time;
 
     constructor(startTime: number, endTime: number | null = null) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.time = new Time();
+        this._startTime = startTime;
+        this._endTime = endTime;
+        this._time = new Time();
     }
 
     getCalculatedSeconds() {
         return Math.abs(
-            (this.endTime != null ? this.endTime : 0) - this.startTime
+            (this._endTime != null ? this._endTime : 0) - this._startTime
         );
     }
 
     calculateTime() {
         let framerate = getFramerate();
         let seconds = this.getCalculatedSeconds();
-        this.time = Time.fromSeconds(seconds, framerate);
+        this._time = Time.fromSeconds(seconds, framerate);
     }
 
     getCalculatedTime() {
         this.calculateTime();
 
-        return this.time;
+        return this._time;
     }
 
     toString() {
+        debugger
         let time = this.getCalculatedTime();
         let hours = time.hours.toString().padStart(2, "0");
         let minutes = time.minutes.toString().padStart(2, "0");
@@ -70,11 +71,31 @@ class Segment {
     }
 
     setStartTime(value: number) {
-        this.startTime = value;
+        this._startTime = value;
     }
 
-    setEndTime(value: number) {
-        this.endTime = value;
+    get startTime(): number {
+        return this._startTime;
+    }
+
+    set startTime(value: number) {
+        this._startTime = value;
+    }
+
+    get endTime(): number | null {
+        return this._endTime;
+    }
+
+    set endTime(value: number | null) {
+        this._endTime = value;
+    }
+
+    get time(): Time {
+        return this._time;
+    }
+
+    set time(value: Time) {
+        this._time = value;
     }
 }
 
@@ -98,7 +119,7 @@ class HTMLSegmentFactory {
         let timeElement = document.createElement("button");
         timeElement.classList.add("time-segment");
 
-        timeElement.addEventListener("click", (e) => {
+        timeElement.addEventListener("click", () => {
 
             let index = segmentList.segments.findIndex((segment) => {
                 return segment.element === timeElement.parentElement;
@@ -121,7 +142,7 @@ class HTMLSegmentFactory {
         resetButton.classList.add("reset-segment");
         resetButton.classList.add("icon");
 
-        resetButton.addEventListener("click", (e) => {
+        resetButton.addEventListener("click", () => {
 
             let index = segmentList.segments.findIndex((segment) => {
                 return segment.element === resetButton.parentElement;
@@ -149,7 +170,7 @@ class HTMLSegmentFactory {
         removeButton.classList.add("remove-segment");
         removeButton.classList.add("icon");
 
-        removeButton.addEventListener("click", (e) => {
+        removeButton.addEventListener("click", () => {
             let index = segmentList.segments.findIndex((segment) => {
                 return segment.element === removeButton.parentElement;
             });
@@ -168,6 +189,7 @@ class HTMLSegmentFactory {
 class HTMLSegment {
     element: HTMLDivElement;
     segment: Segment;
+    private _selected: boolean = false;
 
     constructor(segment: Segment, element: HTMLDivElement) {
         this.segment = segment;
@@ -175,26 +197,28 @@ class HTMLSegment {
         document.querySelector("#segments-container")!.appendChild(element);
     }
 
-    getSegment() {
-        return this.segment;
-    }
-
-    getElement() {
-        return this.element;
-    }
-
     setStartTime(value: number) {
-        this.segment.setStartTime(value);
+        this.segment.startTime = value;
         (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.toString();
     }
 
     setEndTime(value: number) {
-        this.segment.setEndTime(value);
+        this.segment.endTime = value;
         (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.toString();
     }
 
-    isSegmentSelected() {
-        return this.element.classList.contains("selected");
+    get selected() {
+        return this._selected;
+    }
+    set selected(value: boolean) {
+        this._selected = value;
+
+        if (value) {
+            this.element.classList.add("selected");
+        } else {
+            this.element.classList.remove("selected");
+        }
+
     }
 
 }
@@ -210,6 +234,13 @@ class SegmentList {
         this.segments.push(segment);
     }
 
+    clearSegments() {
+        this.segments.forEach((segment) => {
+            segment.element.remove();
+        });
+        this.segments = [];
+    }
+
     setSelectedSegmentStartTime(value: number) {
         let selectedSegment = this.getSelectedSegment();
         selectedSegment.setStartTime(value);
@@ -222,16 +253,18 @@ class SegmentList {
 
     getSelectedSegment() {
         return this.segments.find((segment) => {
-            return segment.element.classList.contains("selected");
+            return segment.selected
         })!;
     }
 
     setSegmentAsSelected(index: number) {
         this.segments.forEach((segment) => {
             segment.element.classList.remove("selected");
+            segment.selected = false;
         });
 
         this.segments[index].element.classList.add("selected");
+        this.segments[index].selected = true;
     }
 
     resetSegment(index: number) {
@@ -241,7 +274,7 @@ class SegmentList {
 
     removeSegment(index: number) {
         let segment = this.segments[index];
-        if (segment.isSegmentSelected()) {
+        if (segment.selected) {
 
             if (this.segments[index + 1]) {
                 this.setSegmentAsSelected(index + 1);
@@ -259,12 +292,18 @@ class SegmentList {
         }
 
     }
+
+    generateDefaultSegment() {
+        let segmentElement = HTMLSegmentFactory.createSegmentElement(new Segment(0));
+
+        segmentList.addSegment(segmentElement);
+
+        segmentList.setSegmentAsSelected(0);
+    }
 }
 
 const segmentList = new SegmentList();
 
-let segmentElement = HTMLSegmentFactory.createSegmentElement(new Segment(0));
-
-segmentList.addSegment(segmentElement);
-
-segmentList.setSegmentAsSelected(0);
+if (segmentList.segments.length === 0) {
+    segmentList.generateDefaultSegment();
+}

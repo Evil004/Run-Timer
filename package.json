@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "mkdir dist && cp -r public/* dist/ && npx tsc",
-    "dev": "mkdir dist && cp -r public/* dist/ && npx tsc -w"
+    "dev": "rm -rf dist/ && mkdir dist && cp -r public/* dist/ && npx tsc -w"
   },
   "repository": {
     "type": "git",
