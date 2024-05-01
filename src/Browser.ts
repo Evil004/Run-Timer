@@ -1,124 +1,126 @@
-
 interface Browser {
-sendMessage(message: any): Promise<any>;
+    sendMessage(message: any): Promise<any>;
 
-getFromStorage(key: string): Promise<any>;
+    getFromStorage(key: string): Promise<any>;
 
-setToStorage(key: string, value: any): void
+    setToStorage(key: string, value: any): void
 }
 
 class ChromeBrowser implements Browser {
 
     private getActiveTab(): Promise<chrome.tabs.Tab> {
-    return new Promise((resolve) => {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-resolve(tabs[0]);
-});
-});
-}
+        return new Promise((resolve) => {
+            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+                resolve(tabs[0]);
+            });
+        });
+    }
 
-sendMessage(message: any): Promise<any> {
-    return new Promise((resolve) => {
-    this.getActiveTab().then((tab) => {
-    let response = chrome.tabs.sendMessage(tab.id!, message);
+    sendMessage(message: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getActiveTab().then((tab) => {
+                let response = chrome.tabs.sendMessage(tab.id!, message);
 
-    response.then((response) => {
-resolve(response);
-});
-});
+                response.then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                })
+            });
 
 
-});
-}
+        });
+    }
 
-getFromStorage(key: string): Promise<any> {
-    return new Promise((resolve) => {
-    chrome.storage.local.get(key, (value) => {
-resolve(value);
-});
-});
-}
+    getFromStorage(key: string): Promise<any> {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(key, (value) => {
+                resolve(value);
+            });
+        });
+    }
 
-setToStorage(key: string, value: any): void {
-    chrome.storage.local.set({[key]: value});
-}
+    setToStorage(key: string, value: any): void {
+
+        chrome.storage.local.set({[key]: value});
+    }
 }
 
 class FirefoxBrowser implements Browser {
 
     private getActiveTab(): Promise<browser.tabs.Tab> {
-    return new Promise((resolve) => {
-    browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-    return resolve(tabs[0]);
-});
-});
-}
+        return new Promise((resolve) => {
+            browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+                return resolve(tabs[0]);
+            });
+        });
+    }
 
-sendMessage(message: any): Promise<any> {
-    return new Promise((resolve) => {
-    this.getActiveTab().then((tab) => {
-    let response = browser.tabs.sendMessage(tab.id!, message);
+    sendMessage(message: any): Promise<any> {
+        return new Promise((resolve) => {
+            this.getActiveTab().then((tab) => {
 
-    response.then((response) => {
-resolve(response);
-});
-});
+                let response = browser.tabs.sendMessage(tab.id!, message);
+
+                response.then((response) => {
+                    resolve(response);
+                });
+            });
 
 
-});
-}
+        });
+    }
 
-getFromStorage(key: string): Promise<any> {
-    return new Promise((resolve) => {
-    browser.storage.local.get(key).then((value) => {
-resolve(value);
-});
-});
-}
+    getFromStorage(key: string): Promise<any> {
+        return new Promise((resolve) => {
+            browser.storage.local.get(key).then((value) => {
+                resolve(value);
+            });
+        });
+    }
 
-setToStorage(key: string, value: any): void {
-    browser.storage.local.set({[key]: value});
-}
+    setToStorage(key: string, value: any): void {
+        browser.storage.local.set({[key]: value});
+    }
 }
 
 class BrowserFactory {
     static getBrowser(): Browser {
-    if (navigator.userAgent.indexOf("Chrome") != -1) {
-    return new ChromeBrowser();
-} else if (navigator.userAgent.indexOf("Firefox") != -1) {
-    return new FirefoxBrowser();
-} else {
-    throw new Error("Unsupported browser");
-}
-}
+        if (navigator.userAgent.indexOf("Chrome") != -1) {
+            return new ChromeBrowser();
+        } else if (navigator.userAgent.indexOf("Firefox") != -1) {
+            return new FirefoxBrowser();
+        } else {
+            throw new Error("Unsupported browser");
+        }
+    }
 }
 
 class ScriptsComunicator {
     private messageSender: Browser;
 
-constructor(messageSender: Browser = BrowserFactory.getBrowser()) {
-    this.messageSender = messageSender;
-}
+    constructor(messageSender: Browser = BrowserFactory.getBrowser()) {
+        this.messageSender = messageSender;
+    }
 
-getVideoSeconds(): Promise<number> {
-    return new Promise<number>((resolve) => {
-    this.messageSender.sendMessage({action: "getExactTime"}).then((response) => {
-    console.log(response);
-resolve(Number(response));
-});
-});
-}
+    getVideoSeconds(): Promise<number> {
+        return new Promise<number>((resolve) => {
+            this.messageSender.sendMessage({action: "getExactTime"}).then((response) => {
+                resolve(Number(response));
+            });
+        });
+    }
 
-sendOpenedExtensionMessage() {
-    this.messageSender.sendMessage({action: "openedExtension"});
-}
+    sendOpenedExtensionMessage() {
+        this.messageSender.sendMessage({action: "openedExtension"});
+    }
 
-changeSelectedInput() {
-    this.messageSender.sendMessage({action: "changeSelectedInput"});
-}
+    changeSelectedInput() {
+        this.messageSender.sendMessage({action: "changeSelectedInput"});
+    }
 
-setTimeToTheSelectedInput(time: Time) {
-    this.messageSender.sendMessage({action: "setTimeToTheSelectedInput", time: time});
-}
+    setTimeToTheSelectedInput(time: Time) {
+        this.messageSender.sendMessage({action: "setTimeToTheSelectedInput", time: time});
+    }
 }
 

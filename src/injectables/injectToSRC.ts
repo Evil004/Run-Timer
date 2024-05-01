@@ -34,7 +34,8 @@ let respondToMessage = (request: any, _sender: any, sendResponse: (response?: an
             sendResponse();
             break;
         case "changeSelectedInput":
-            selectInput((selectedInput.index + 1) % document.querySelectorAll(".x-input-runtime-container").length);
+            selectedInput.index = (selectedInput.index + 1) % document.querySelectorAll(".x-input-runtime-container").length;
+            selectInput(selectedInput.index);
             sendResponse();
             break;
         case "setTime":

@@ -227,7 +227,6 @@ class SegmentList {
     }
 
     setSegmentAsSelected(index: number) {
-        console.log(index)
         this.segments.forEach((segment) => {
             segment.element.classList.remove("selected");
         });

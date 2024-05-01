@@ -4,8 +4,8 @@
   "description": "![Run-Timer Logo](./.github/imgs/Run-Timer_Baner.png)",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "mkdir dist && cp -r public/* dist/ && npx tsc",
+    "dev": "mkdir dist && cp -r public/* dist/ && npx tsc -w"
   },
   "repository": {
     "type": "git",

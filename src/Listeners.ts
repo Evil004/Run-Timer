@@ -1,9 +1,15 @@
 let browserAction = new ScriptsComunicator();
-
+let browsera = BrowserFactory.getBrowser();
 
 window.onload = async () => {
+    let loaded = await browsera.getFromStorage("test");
     browserAction.sendOpenedExtensionMessage()
 }
+
+window.onclose = async () => {
+    browsera.setToStorage("test", "testValue");
+}
+
 
 BUTTONS.addSegmentBtn.addEventListener('click', async (e) => {
     segmentList.addSegment(HTMLSegmentFactory.createSegmentElement(new Segment(0)));

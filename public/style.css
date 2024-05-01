@@ -8,7 +8,7 @@
     font-style: normal;
     font-weight: 400;
     src: local("Helsinki"),
-        url("https://fonts.cdnfonts.com/s/192/helsinki.woff") format("woff");
+    url("https://fonts.cdnfonts.com/s/192/helsinki.woff") format("woff");
 }
 
 html {
@@ -21,10 +21,6 @@ html {
 
 label {
     font-size: 20px;
-}
-
-#about-btn{
-    padding: 0px;
 }
 
 button {
@@ -46,7 +42,7 @@ button:hover {
 
 body {
     margin: 0px;
-    width: 430px;
+    width: 425px;
     height: 550px;
     background-color: #0f0f0f;
     color: #f2f2f2;
@@ -60,6 +56,10 @@ body {
 header {
     display: flex;
     align-items: center;
+}
+
+#about-btn {
+    padding: 0px;
 }
 
 h1 {
@@ -94,33 +94,34 @@ input[type="text"] {
     color: #fafafa;
 }
 
-#time-segment-btn {
+.time-segment {
     width: 220px;
-    padding: 2px;
+
     vertical-align: middle;
 
     background-color: #272727;
 }
 
-#time-segment-btn:hover > div {
+
+
+.time-segment:hover > .segment-value {
     background-color: #303030;
 }
 
-#time-segment-btn:hover {
-    padding: 2px;
+.time-segment:hover {
 
     background-color: #444444;
 }
 
-#time-segment-btn[checked="true"] {
+.segment.selected > .time-segment {
     background-color: #838383;
 }
 
-#time-segment-btn:active {
+.time-segment:active {
     background-color: #484848;
 }
 
-#time-segment-btn:active > div {
+.time-segment:active > .segment-value {
     background-color: #484848;
 }
 
@@ -218,9 +219,9 @@ footer > * {
     margin: 0px;
     position: fixed;
     top: 15%;
-    left: 49.8%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    width: 431px;
+    width: 426px;
     height: 30%;
     color: #fafafa;
     background-color: #0f0f0f;
@@ -242,8 +243,7 @@ footer > * {
     border-bottom-right-radius: 10px;
 }
 
-
-#warning[style="visibility: hidden;"]{
+#warning[style="visibility: hidden;"] {
     animation: top-botI 250ms ease-in-out;
 }
 
@@ -262,13 +262,12 @@ footer > * {
 
 @keyframes top-botI {
     0% {
-        visibility:visible;
+        visibility: visible;
         transform: translate(-50%, -50%);
     }
-    100%
-    {
+    100% {
         transform: translate(-50%, -150%);
-        visibility:hidden;
+        visibility: hidden;
     }
 }
 
@@ -311,7 +310,7 @@ footer > * {
     }
     100% {
         visibility: hidden;
-        opacity: 0; 
+        opacity: 0;
     }
 }
 
@@ -342,9 +341,9 @@ footer > * {
     margin-left: 10px;
 }
 
-#warning > button{
+#warning > button {
     margin-top: 0px;
-   
+
 }
 
 #warning-yes-btn {
