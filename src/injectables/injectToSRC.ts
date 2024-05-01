@@ -39,18 +39,29 @@ let respondToMessage = (request: any, _sender: any, sendResponse: (response?: an
             sendResponse();
             break;
         case "setTime":
+            console.log(request)
             try {
-                let {hours, minutes, seconds, milliseconds} = request.extraData;
-                let hourInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=hour]")!
-                let minuteInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=minute]")!
-                let secondInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=second]")!
-                let millisecondInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=millisecond]")!
-                hourInput.value = hours;
-                minuteInput.value = minutes;
-                secondInput.value = seconds;
-                millisecondInput.value = milliseconds;
+                let {hours, minutes, seconds, milliseconds} = request.time;
 
-                ["hour", "minute", "second", "millisecond"].forEach(timeUnit => triggerChangeEvent(selectedInput.input!.querySelector(`[name$=${timeUnit}]`)!));
+                let hourInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=hour]")!
+                hourInput.value = hours;
+                triggerChangeEvent(hourInput);
+
+                let minuteInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=minute]")!
+                minuteInput.value = minutes;
+                triggerChangeEvent(minuteInput);
+
+                let secondInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=second]")!
+                secondInput.value = seconds;
+                triggerChangeEvent(secondInput);
+
+                let millisecondInput: HTMLInputElement = selectedInput.input!.querySelector("[name$=millisecond]")!
+                millisecondInput.value = milliseconds;
+                triggerChangeEvent(millisecondInput);
+
+
+
+
                 sendResponse({message: "success"});
             } catch (error) {
                 console.log(error);

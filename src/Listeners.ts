@@ -28,6 +28,11 @@ BUTTONS.calculateBtn.addEventListener('click', async (e) => {
     ELEMENTS.calculatedTimeText.value = time.toString();
 });
 
+BUTTONS.sendToSRCBtn.addEventListener('click', async (e) => {
+let time = Time.fromSeconds(parseFloat(ELEMENTS.videoTimeInput.value), getFramerate());
+    browserAction.setTimeToSRC(time);
+})
+
 BUTTONS.resetAllBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     if (confirm("Are you sure you want to reset all?")) {

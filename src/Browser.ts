@@ -132,8 +132,9 @@ class ScriptsComunicator {
         this.messageSender.sendMessage({action: "changeSelectedInput"});
     }
 
-    setTimeToTheSelectedInput(time: Time) {
-        this.messageSender.sendMessage({action: "setTimeToTheSelectedInput", time: time});
+    setTimeToSRC(time: Time) {
+        console.log(time)
+        this.messageSender.sendMessage({action: "setTime", time: time});
     }
 }
 
