@@ -38,7 +38,7 @@ const WARNING_MESSAGES = {
 const ELEMENTS: {
     framerateInput: HTMLInputElement;
     videoTimeInput: HTMLInputElement;
-    errorMessage: HTMLSpanElement;
+    notificationMessage: HTMLSpanElement;
     segmentsContainer: HTMLDivElement;
     calculatedTimeText: HTMLInputElement;
     warningModal: HTMLDivElement;
@@ -46,7 +46,7 @@ const ELEMENTS: {
 } = {
     framerateInput: document.querySelector("#framerate")!,
     videoTimeInput: document.querySelector("#time-text")!,
-    errorMessage: document.querySelector("#notification-message")!,
+    notificationMessage: document.querySelector("#notification-message")!,
     segmentsContainer: document.querySelector("#segments-container")!,
     calculatedTimeText: document.querySelector("#calculated-time")!,
     warningModal: document.querySelector("#warning")!,

@@ -9,10 +9,9 @@ interface Browser {
 }
 
 class ChromeBrowser implements Browser {
-
     private getActiveTab(): Promise<chrome.tabs.Tab> {
         return new Promise((resolve) => {
-            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 resolve(tabs[0]);
             });
         });
@@ -23,14 +22,14 @@ class ChromeBrowser implements Browser {
             this.getActiveTab().then((tab) => {
                 let response = chrome.tabs.sendMessage(tab.id!, message);
 
-                response.then((response) => {
-                    resolve(response);
-                }).catch((error) => {
-                    reject(error);
-                })
+                response
+                    .then((response) => {
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
             });
-
-
         });
     }
 
@@ -43,40 +42,36 @@ class ChromeBrowser implements Browser {
     }
 
     setToStorage(key: string, value: any): void {
-
-        chrome.storage.local.set({[key]: value});
+        chrome.storage.local.set({ [key]: value });
     }
 
     removeFromStorage(key: string): void {
         chrome.storage.local.remove(key).catch((error) => {
             console.log(error);
-
         });
     }
 }
 
 class FirefoxBrowser implements Browser {
-
     private getActiveTab(): Promise<browser.tabs.Tab> {
         return new Promise((resolve) => {
-            browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-                return resolve(tabs[0]);
-            });
+            browser.tabs
+                .query({ active: true, currentWindow: true })
+                .then((tabs) => {
+                    return resolve(tabs[0]);
+                });
         });
     }
 
     sendMessage(message: any): Promise<any> {
         return new Promise((resolve) => {
             this.getActiveTab().then((tab) => {
-
                 let response = browser.tabs.sendMessage(tab.id!, message);
 
                 response.then((response) => {
                     resolve(response);
                 });
             });
-
-
         });
     }
 
@@ -89,7 +84,7 @@ class FirefoxBrowser implements Browser {
     }
 
     setToStorage(key: string, value: any): void {
-        browser.storage.local.set({[key]: value});
+        browser.storage.local.set({ [key]: value });
     }
 
     removeFromStorage(key: string): void {
@@ -118,23 +113,29 @@ class ScriptsComunicator {
 
     getVideoSeconds(): Promise<number> {
         return new Promise<number>((resolve) => {
-            this.messageSender.sendMessage({action: "getExactTime"}).then((response) => {
-                resolve(Number(response));
-            });
+            this.messageSender
+                .sendMessage({ action: "getExactTime" })
+                .then((response) => {
+                    resolve(Number(response));
+                });
         });
     }
 
     sendOpenedExtensionMessage() {
-        this.messageSender.sendMessage({action: "openedExtension"});
+        this.messageSender.sendMessage({ action: "openedExtension" });
     }
 
-    changeSelectedInput() {
-        this.messageSender.sendMessage({action: "changeSelectedInput"});
+    changeSelectedInput(): Promise<void> {
+        return this.messageSender.sendMessage({
+            action: "changeSelectedInput",
+        });
     }
 
-    setTimeToSRC(time: Time) {
-        console.log(time)
-        this.messageSender.sendMessage({action: "setTime", time: time});
+    setTimeToSRC(time: Time): Promise<void> {
+        console.log(time);
+        return this.messageSender.sendMessage({
+            action: "setTime",
+            time: time,
+        });
     }
 }
-

@@ -8,7 +8,7 @@
     font-style: normal;
     font-weight: 400;
     src: local("Helsinki"),
-    url("https://fonts.cdnfonts.com/s/192/helsinki.woff") format("woff");
+        url("https://fonts.cdnfonts.com/s/192/helsinki.woff") format("woff");
 }
 
 html {
@@ -33,7 +33,6 @@ button {
 
     padding: 7px;
     border-radius: 5px;
-
 }
 
 button:hover {
@@ -102,14 +101,11 @@ input[type="text"] {
     background-color: #272727;
 }
 
-
-
 .time-segment:hover > .segment-value {
     background-color: #303030;
 }
 
 .time-segment:hover {
-
     background-color: #444444;
 }
 
@@ -144,9 +140,20 @@ input[type="text"] {
 #notification-message {
     margin: 0px;
     font-family: Arial, Helvetica, sans-serif;
-    color: #ff0000;
     font-size: 13px;
     font-weight: bold;
+}
+
+.error {
+    color: #ff3e30;
+}
+
+.success {
+    color: #00ae52;
+}
+
+.info {
+    color: #0067dd;
 }
 
 img {
@@ -314,7 +321,6 @@ footer > * {
     }
 }
 
-
 .title-container {
     margin-left: 20px;
     margin-bottom: 15px;
@@ -334,7 +340,6 @@ footer > * {
     font-size: 28px;
     margin: 0;
     color: #fee5c7;
-
 }
 
 .warning-text {
@@ -343,7 +348,6 @@ footer > * {
 
 #warning > button {
     margin-top: 0px;
-
 }
 
 #warning-yes-btn {
@@ -354,7 +358,6 @@ footer > * {
 #warning-yes-btn:hover {
     background-color: #e9c79e;
 }
-
 
 /*
                                              *@@                  @@/           
