@@ -14,6 +14,11 @@ document.addEventListener("click", saveOnChange);
 document.addEventListener("input", saveOnChange);
 
 
+BUTTONS.copyModNoteBtn.addEventListener('click', async (e) => {
+    let text = generateModNote();
+    navigator.clipboard.writeText(text);
+});
+
 BUTTONS.copyBtn.addEventListener('click', async (e) => {
     let text = ELEMENTS.calculatedTimeText.value;
     navigator.clipboard.writeText(text);

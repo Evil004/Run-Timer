@@ -53,3 +53,14 @@ function restoreData(data: any) {
         ELEMENTS.calculatedTimeText.value = data.calculatedTime?.toString() ?? DEFAULT_TIME;
     }
 }
+
+function generateModNote() {
+    let totalTime = segmentList.getTotalTime();
+    let segmentsNote = segmentList.segments.map((segment) => {
+        return `${segment.segment.getCalculatedTime().toString()}`
+    }).join(" + ");
+
+    let modNote = `Mod Message: The sections ${segmentsNote}, at fps ${getFramerate()} add up to a final time of ${totalTime.toString()}`
+
+    return modNote;
+}
