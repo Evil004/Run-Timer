@@ -85,3 +85,11 @@ const BUTTONS:{
     setFramerateTo30Btn: document.querySelector("#thirty-framerate-btn")!,
     copyModNoteBtn: document.querySelector("#copy-mod-note-btn")!,
 };
+
+
+
+// @ts-ignore
+function getFramerate(){
+    let framerate = parseFloat(ELEMENTS.framerateInput.value);
+    return isNaN(framerate) ? DEFAULT_FRAMERATE : framerate;
+}
