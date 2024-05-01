@@ -28,17 +28,20 @@ class Time {
 
         return new Time(hours, minutes, seconds, milliseconds);
     }
+
+
+    toString() {
+        return `${this.hours.toString().padStart(2, '0')}h ${this.minutes.toString().padStart(2, '0')}m ${this.seconds.toString().padStart(2, '0')}s ${this.milliseconds.toString().padStart(3, '0')}ms`;
+    }
 }
 
 class Segment {
     private _startTime: number;
     private _endTime: number | null;
-    private _time: Time;
 
     constructor(startTime: number, endTime: number | null = null) {
         this._startTime = startTime;
         this._endTime = endTime;
-        this._time = new Time();
     }
 
     getCalculatedSeconds() {
@@ -47,27 +50,10 @@ class Segment {
         );
     }
 
-    calculateTime() {
+    getCalculatedTime() {
         let framerate = getFramerate();
         let seconds = this.getCalculatedSeconds();
-        this._time = Time.fromSeconds(seconds, framerate);
-    }
-
-    getCalculatedTime() {
-        this.calculateTime();
-
-        return this._time;
-    }
-
-    toString() {
-        debugger
-        let time = this.getCalculatedTime();
-        let hours = time.hours.toString().padStart(2, "0");
-        let minutes = time.minutes.toString().padStart(2, "0");
-        let seconds = time.seconds.toString().padStart(2, "0");
-        let milliseconds = time.milliseconds.toString().padStart(3, "0");
-
-        return `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
+        return Time.fromSeconds(seconds, framerate);
     }
 
     setStartTime(value: number) {
@@ -88,14 +74,6 @@ class Segment {
 
     set endTime(value: number | null) {
         this._endTime = value;
-    }
-
-    get time(): Time {
-        return this._time;
-    }
-
-    set time(value: Time) {
-        this._time = value;
     }
 }
 
@@ -130,7 +108,7 @@ class HTMLSegmentFactory {
 
         let valueSpan = document.createElement("span");
         valueSpan.classList.add("segment-value");
-        valueSpan.innerText = segment.toString();
+        valueSpan.innerText = segment.getCalculatedTime().toString();
 
         timeElement.appendChild(valueSpan);
 
@@ -199,17 +177,18 @@ class HTMLSegment {
 
     setStartTime(value: number) {
         this.segment.startTime = value;
-        (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.toString();
+        (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.getCalculatedTime().toString();
     }
 
     setEndTime(value: number) {
         this.segment.endTime = value;
-        (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.toString();
+        (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.getCalculatedTime().toString();
     }
 
     get selected() {
         return this._selected;
     }
+
     set selected(value: boolean) {
         this._selected = value;
 
@@ -299,6 +278,15 @@ class SegmentList {
         segmentList.addSegment(segmentElement);
 
         segmentList.setSegmentAsSelected(0);
+    }
+
+    getTotalTime() {
+        let totalTime = 0;
+        this.segments.forEach((segment) => {
+            totalTime += segment.segment.getCalculatedSeconds();
+        });
+
+        return totalTime;
     }
 }
 

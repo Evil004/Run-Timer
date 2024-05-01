@@ -21,7 +21,8 @@ function collectDataToSave() {
             }
         }),
         framerate: parseFloat(ELEMENTS.framerateInput.value),
-        videoTime: getVideoTime()
+        videoTime: getVideoTime(),
+        calculatedTime: ELEMENTS.calculatedTimeText.value
     }
     return data
 }
@@ -29,7 +30,7 @@ function collectDataToSave() {
 function saveOnChange(e: Event) {
     let data = collectDataToSave();
 
-    browsera.setToStorage("data", data);
+    browserController.setToStorage("data", data);
 }
 
 function restoreData(data: any) {
@@ -49,6 +50,6 @@ function restoreData(data: any) {
 
         ELEMENTS.framerateInput.value = isNaN(data.framerate) ? "" : data.framerate;
         ELEMENTS.videoTimeInput.value = data.videoTime == 0 ? "0.0" : data.videoTime;
-
+        ELEMENTS.calculatedTimeText.value = data.calculatedTime?.toString() ?? DEFAULT_TIME;
     }
 }

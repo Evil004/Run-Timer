@@ -1,8 +1,8 @@
 let browserAction = new ScriptsComunicator();
-let browsera = BrowserFactory.getBrowser();
+let browserController = BrowserFactory.getBrowser();
 
 window.onload = async () => {
-    let response = await browsera.getFromStorage("data")
+    let response = await browserController.getFromStorage("data")
 
     restoreData(response.data)
 
@@ -14,6 +14,20 @@ document.addEventListener("click", saveOnChange);
 document.addEventListener("input", saveOnChange);
 
 
+BUTTONS.copyBtn.addEventListener('click', async (e) => {
+    let text = ELEMENTS.calculatedTimeText.value;
+    navigator.clipboard.writeText(text);
+
+})
+
+BUTTONS.calculateBtn.addEventListener('click', async (e) => {
+    let totalTime = segmentList.getTotalTime();
+
+    let time = Time.fromSeconds(totalTime, getFramerate());
+
+    ELEMENTS.calculatedTimeText.value = time.toString();
+});
+
 BUTTONS.resetAllBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     if (confirm("Are you sure you want to reset all?")) {
@@ -21,9 +35,9 @@ BUTTONS.resetAllBtn.addEventListener('click', async (e) => {
         ELEMENTS.videoTimeInput.value = "0.0";
         segmentList.clearSegments();
         segmentList.generateDefaultSegment();
+        ELEMENTS.calculatedTimeText.value = DEFAULT_TIME;
 
-
-        browsera.removeFromStorage("data");
+        browserController.removeFromStorage("data");
     }
 });
 
