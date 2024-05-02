@@ -8,7 +8,7 @@
     font-style: normal;
     font-weight: 400;
     src: local("Helsinki"),
-        url("https://fonts.cdnfonts.com/s/192/helsinki.woff") format("woff");
+    url("https://fonts.cdnfonts.com/s/192/helsinki.woff") format("woff");
 }
 
 html {
@@ -361,6 +361,40 @@ footer > * {
 
 .hidden {
     display: none;
+}
+
+.tooltip {
+    visibility: hidden;
+
+    background-color: #272727;
+    color: #f2f2f2;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 9px;
+    width: fit-content;
+    text-align: center;
+
+
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip > * {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    padding: 5px;
+}
+
+.tooltipStart {
+    border-bottom: 1px solid #f2f2f2;
+}
+
+
+.time-segment:hover > .tooltip {
+    visibility: visible;
 }
 
 /*

@@ -86,10 +86,26 @@ class HTMLSegmentFactory {
         let segmentText = this.createTimeSegmentElement(segment);
         let resetButton = this.createResetSegmentButton();
         let removeButton = this.createRemoveButton();
+        let tooltip = this.createTooltip(segment);
 
         segmentElement.appendChild(segmentText);
         segmentElement.appendChild(resetButton);
         segmentElement.appendChild(removeButton);
+        segmentText.appendChild(tooltip);
+
+        segmentElement.addEventListener("mouseover", () => {
+            tooltip.querySelector(".startValue")!.textContent = Time.fromSeconds(segment.startTime, getFramerate()).toString();
+            tooltip.querySelector(".endValue")!.textContent = segment.endTime ? Time.fromSeconds(segment.endTime, getFramerate()).toString() : "Not Set";
+
+            let segmentRect = segmentElement.getBoundingClientRect();
+            let tooltipRect = tooltip.getBoundingClientRect();
+
+            tooltip.style.left = segmentRect.left + 'px';
+            tooltip.style.top = segmentRect.bottom - tooltipRect.height- segmentRect.height - 3  + 'px';
+
+
+
+        });
 
         return new HTMLSegment(segment, segmentElement);
     }
@@ -109,6 +125,7 @@ class HTMLSegmentFactory {
 
         let valueSpan = document.createElement("span");
         valueSpan.classList.add("segment-value");
+
         try {
             if (segment.endTime && segment.startTime) {
                 valueSpan.innerText = segment.getCalculatedTime().toString();
@@ -170,6 +187,38 @@ class HTMLSegmentFactory {
         removeButton.appendChild(icon);
 
         return removeButton;
+    }
+
+    static createTooltip(segment: Segment): HTMLSpanElement {
+        let tooltip = document.createElement("span");
+        tooltip.classList.add("tooltip");
+
+        let start = document.createElement("p")
+        start.classList.add("tooltipStart");
+
+        let startLabel = document.createElement("span");
+        startLabel.textContent = "Start: ";
+        start.appendChild(startLabel);
+
+        let startValue = document.createElement("span");
+        startValue.classList.add("startValue");
+        start.appendChild(startValue);
+
+        tooltip.appendChild(start);
+
+        let end = document.createElement("p")
+        end.classList.add("tooltipEnd");
+
+        let endLabel = document.createElement("span");
+        endLabel.textContent = "End: ";
+        end.appendChild(endLabel);
+
+        let endValue = document.createElement("span");
+        endValue.classList.add("endValue");
+        end.appendChild(endValue);
+
+        tooltip.appendChild(end);
+        return tooltip;
     }
 }
 
