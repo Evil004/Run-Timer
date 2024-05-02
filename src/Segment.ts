@@ -54,6 +54,7 @@ class Segment {
         let framerate = getFramerate();
         let seconds = this.getCalculatedSeconds();
         return Time.fromSeconds(seconds, framerate);
+
     }
 
     setStartTime(value: number) {
@@ -108,7 +109,15 @@ class HTMLSegmentFactory {
 
         let valueSpan = document.createElement("span");
         valueSpan.classList.add("segment-value");
-        valueSpan.innerText = segment.getCalculatedTime().toString();
+        try {
+            if (segment.endTime && segment.startTime) {
+                valueSpan.innerText = segment.getCalculatedTime().toString();
+            } else {
+                valueSpan.innerText = DEFAULT_TIME;
+            }
+        } catch (e: any) {
+            valueSpan.innerText = DEFAULT_TIME;
+        }
 
         timeElement.appendChild(valueSpan);
 
@@ -177,12 +186,16 @@ class HTMLSegment {
 
     setStartTime(value: number) {
         this.segment.startTime = value;
-        (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.getCalculatedTime().toString();
+        if (this.segment.endTime) {
+            (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.getCalculatedTime().toString();
+        }
     }
 
-    setEndTime(value: number) {
+    setEndTime(value: number | null) {
         this.segment.endTime = value;
-        (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.getCalculatedTime().toString();
+        if (this.segment.startTime) {
+            (this.element.querySelector(".segment-value")! as HTMLButtonElement).innerText = this.segment.getCalculatedTime().toString();
+        }
     }
 
     get selected() {
@@ -211,6 +224,10 @@ class SegmentList {
 
     addSegment(segment: HTMLSegment) {
         this.segments.push(segment);
+        this.setSegmentAsSelected(this.segments.length - 1)
+        if (this.segments.length == 1) {
+            this.segments[0].element.querySelector(".remove-segment")!.classList.add("hidden");
+        }
     }
 
     clearSegments() {
@@ -236,6 +253,12 @@ class SegmentList {
         })!;
     }
 
+    getSelectedSegmentIndex() {
+        return this.segments.findIndex((segment) => {
+            return segment.selected
+        });
+    }
+
     setSegmentAsSelected(index: number) {
         this.segments.forEach((segment) => {
             segment.element.classList.remove("selected");
@@ -247,8 +270,10 @@ class SegmentList {
     }
 
     resetSegment(index: number) {
+        debugger
         this.segments[index].setStartTime(0);
-        this.segments[index].setEndTime(0);
+        this.segments[index].setEndTime(null);
+        this.segments[index].element.querySelector(".segment-value")!.textContent = DEFAULT_TIME;
     }
 
     removeSegment(index: number) {
@@ -265,10 +290,6 @@ class SegmentList {
         segment.element.remove();
         this.segments.splice(index, 1);
 
-        if (this.segments.length === 0) {
-            this.addSegment(HTMLSegmentFactory.createSegmentElement(new Segment(0)));
-            this.setSegmentAsSelected(0);
-        }
 
     }
 

@@ -1,34 +1,31 @@
 class NotificationManager{
-    private static recentlySetNotification: boolean = false;
     static setErrorNotification(message: string){
+        this.removeNotification()
         ELEMENTS.notificationMessage.innerText = message;
         ELEMENTS.notificationMessage.classList.add("error");
-        this.recentlySetNotification = true;
     }
 
     static setInfoNotification(message: string){
+        this.removeNotification()
+
         ELEMENTS.notificationMessage.innerText = message;
         ELEMENTS.notificationMessage.classList.add("info");
-        this.recentlySetNotification = true;
 
     }
 
     static setSuccessNotification(message: string){
+        this.removeNotification()
+
         ELEMENTS.notificationMessage.innerText = message;
         ELEMENTS.notificationMessage.classList.add("success");
-        this.recentlySetNotification = true;
 
     }
 
     static removeNotification(){
-        if (!this.recentlySetNotification){
             ELEMENTS.notificationMessage.innerText = "";
             ELEMENTS.notificationMessage.classList.remove("error");
             ELEMENTS.notificationMessage.classList.remove("info");
             ELEMENTS.notificationMessage.classList.remove("success");
-        }
-
-        this.recentlySetNotification = false;
 
     }
 

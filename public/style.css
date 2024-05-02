@@ -359,6 +359,10 @@ footer > * {
     background-color: #e9c79e;
 }
 
+.hidden {
+    display: none;
+}
+
 /*
                                              *@@                  @@/           
                                            @@@@@@@%            (@@@@@@@         

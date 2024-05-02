@@ -5,7 +5,7 @@ const DEFAULT_TIME = "00h 00m 00s 000ms";
 const NOTIFICATION_MESSAGES = {
     framerateIsNaN: "Framerate must be a number",
     framerateIsEmpty: "Framerate cannot be empty",
-    framerateUnderOrEqual0: "Framerate cannot be under 0",
+    framerateUnderOrEqual0: "Framerate cannot be under 0 or Equal to 0!",
     copied: "Copied to ClipBoard!",
     timeIsEmpty: "Time cannot be empty",
     noSegmentSelected: "No segment selected",

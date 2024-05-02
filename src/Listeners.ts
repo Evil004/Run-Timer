@@ -11,7 +11,7 @@ window.onload = async () => {
 
 
 document.addEventListener("change", saveOnChange);
-document.addEventListener("click", (e)=>{
+document.addEventListener("click", (e) => {
     saveOnChange(e);
 
     NotificationManager.removeNotification();
@@ -20,12 +20,17 @@ document.addEventListener("input", saveOnChange);
 
 
 BUTTONS.copyModNoteBtn.addEventListener('click', async (e) => {
-    let text = generateModNote();
-    navigator.clipboard.writeText(text).then(() => {
-        NotificationManager.setSuccessNotification("Copied to clipboard!")
-    }).catch(() => {
-        NotificationManager.setErrorNotification("Error copying to clipboard!")
-    });
+    try {
+        let text = generateModNote();
+        navigator.clipboard.writeText(text).then(() => {
+            NotificationManager.setSuccessNotification("Copied to clipboard!")
+        }).catch(() => {
+            NotificationManager.setErrorNotification("Error copying to clipboard!")
+        });
+    } catch (e: any) {
+        NotificationManager.setErrorNotification(e.message);
+    }
+
 });
 
 BUTTONS.copyBtn.addEventListener('click', async (e) => {
@@ -41,18 +46,27 @@ BUTTONS.copyBtn.addEventListener('click', async (e) => {
 BUTTONS.calculateBtn.addEventListener('click', async (e) => {
     let totalTime = segmentList.getTotalTime();
 
-    let time = Time.fromSeconds(totalTime, getFramerate());
+    try {
+        let time = Time.fromSeconds(totalTime, getFramerate());
 
-    ELEMENTS.calculatedTimeText.value = time.toString();
+        ELEMENTS.calculatedTimeText.value = time.toString();
+    } catch (e: any) {
+        NotificationManager.setErrorNotification(e.message);
+    }
 });
 
 BUTTONS.sendToSRCBtn.addEventListener('click', async (e) => {
-    let time = Time.fromSeconds(parseFloat(ELEMENTS.videoTimeInput.value), getFramerate());
-    browserAction.setTimeToSRC(time).then(() => {
-        NotificationManager.setSuccessNotification("Time set!")
-    }).catch(() => {
-        NotificationManager.setErrorNotification("Error when comunicating with SRC!")
-    });
+    try {
+        let time = Time.fromSeconds(segmentList.getTotalTime(), getFramerate());
+        debugger
+        browserAction.setTimeToSRC(time).then(() => {
+            NotificationManager.setSuccessNotification("Time set!")
+        }).catch(() => {
+            NotificationManager.setErrorNotification("Error when comunicating with SRC!")
+        });
+    } catch (e: any) {
+        NotificationManager.setErrorNotification(e.message);
+    }
 })
 
 BUTTONS.resetAllBtn.addEventListener('click', async (e) => {
@@ -74,13 +88,39 @@ BUTTONS.addSegmentBtn.addEventListener('click', async (e) => {
 });
 
 BUTTONS.setStartTimeBtn.addEventListener('click', async (e) => {
-    segmentList.setSelectedSegmentStartTime(parseFloat(ELEMENTS.videoTimeInput.value));
-    NotificationManager.setInfoNotification("Start time set!");
+
+
+
+    try {
+        let time = parseFloat(ELEMENTS.videoTimeInput.value);
+        if (segmentList.getSelectedSegment().segment.startTime  && segmentList.getSelectedSegment().segment.startTime != time) {
+            if (!await NotificationManager.showWarningModal("Are you sure you want to overwrite the start time?")) {
+                return;
+            }
+        }
+        segmentList.setSelectedSegmentStartTime(time);
+        NotificationManager.setInfoNotification("Start time set!");
+    } catch (e: any) {
+        NotificationManager.setErrorNotification(e.message);
+    }
 })
 
 BUTTONS.setEndTimeBtn.addEventListener('click', async (e) => {
-    segmentList.setSelectedSegmentEndTime(parseFloat(ELEMENTS.videoTimeInput.value));
-    NotificationManager.setInfoNotification("End time set!");
+
+    try {
+        let time = parseFloat(ELEMENTS.videoTimeInput.value);
+
+        if (segmentList.getSelectedSegment().segment.endTime && segmentList.getSelectedSegment().segment.endTime != time) {
+            if (!await NotificationManager.showWarningModal("Are you sure you want to overwrite the end time?")) {
+                return;
+            }
+        }
+        segmentList.setSelectedSegmentEndTime(time);
+
+        NotificationManager.setInfoNotification("End time set!");
+    } catch (e: any) {
+        NotificationManager.setErrorNotification(e.message);
+    }
 })
 
 BUTTONS.setFramerateTo30Btn.addEventListener('click', async (e) => {
@@ -92,12 +132,23 @@ BUTTONS.setFramerateTo60Btn.addEventListener('click', async (e) => {
 });
 
 BUTTONS.getExactTimeBtn.addEventListener('click', async (e) => {
-    browserAction.getVideoSeconds().then((time) => {
-        ELEMENTS.videoTimeInput.value = time.toString();
-        NotificationManager.setSuccessNotification("Got time from video player!")
-    }).catch(() => {
-        NotificationManager.setErrorNotification("Error communicating with the video player!")
-    });
+    try {
+        debugger
+        let fps = getFramerate();
+        browserAction.getVideoSeconds().then((response) => {
+
+            let time = Math.floor(response * fps) / fps;
+
+            ELEMENTS.videoTimeInput.value = time.toString();
+            NotificationManager.setSuccessNotification("Got time from video player!")
+
+        }).catch((e) => {
+            NotificationManager.setErrorNotification("Error communicating with the video player!")
+        });
+    } catch (e: any) {
+        NotificationManager.setErrorNotification(e.message);
+
+    }
 });
 
 BUTTONS.changeSRCTimeInputBtn.addEventListener('click', async (e) => {

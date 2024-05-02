@@ -11,7 +11,7 @@ interface Browser {
 class ChromeBrowser implements Browser {
     private getActiveTab(): Promise<chrome.tabs.Tab> {
         return new Promise((resolve) => {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
                 resolve(tabs[0]);
             });
         });
@@ -42,7 +42,7 @@ class ChromeBrowser implements Browser {
     }
 
     setToStorage(key: string, value: any): void {
-        chrome.storage.local.set({ [key]: value });
+        chrome.storage.local.set({[key]: value});
     }
 
     removeFromStorage(key: string): void {
@@ -56,7 +56,7 @@ class FirefoxBrowser implements Browser {
     private getActiveTab(): Promise<browser.tabs.Tab> {
         return new Promise((resolve) => {
             browser.tabs
-                .query({ active: true, currentWindow: true })
+                .query({active: true, currentWindow: true})
                 .then((tabs) => {
                     return resolve(tabs[0]);
                 });
@@ -64,13 +64,19 @@ class FirefoxBrowser implements Browser {
     }
 
     sendMessage(message: any): Promise<any> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this.getActiveTab().then((tab) => {
                 let response = browser.tabs.sendMessage(tab.id!, message);
 
                 response.then((response) => {
+                    if (response == "No action found") {
+                        reject(response);
+                    }
+
                     resolve(response);
-                });
+                }).catch((error) => {
+                    reject(error);
+                })
             });
         });
     }
@@ -84,7 +90,7 @@ class FirefoxBrowser implements Browser {
     }
 
     setToStorage(key: string, value: any): void {
-        browser.storage.local.set({ [key]: value });
+        browser.storage.local.set({[key]: value});
     }
 
     removeFromStorage(key: string): void {
@@ -112,17 +118,13 @@ class ScriptsComunicator {
     }
 
     getVideoSeconds(): Promise<number> {
-        return new Promise<number>((resolve) => {
-            this.messageSender
-                .sendMessage({ action: "getExactTime" })
-                .then((response) => {
-                    resolve(Number(response));
-                });
-        });
+        return this.messageSender
+            .sendMessage({action: "getExactTime"})
+
     }
 
     sendOpenedExtensionMessage() {
-        this.messageSender.sendMessage({ action: "openedExtension" });
+        this.messageSender.sendMessage({action: "openedExtension"});
     }
 
     changeSelectedInput(): Promise<void> {

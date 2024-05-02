@@ -1,7 +1,19 @@
 // @ts-ignore
 function getFramerate() {
-    let framerate = parseFloat(ELEMENTS.framerateInput.value);
-    return isNaN(framerate) ? DEFAULT_FRAMERATE : framerate;
+    let framerate = DEFAULT_FRAMERATE;
+
+    if (ELEMENTS.framerateInput.value != "") {
+        framerate = parseFloat(ELEMENTS.framerateInput.value);
+    }
+
+    if (framerate <= 0) {
+        throw new Error(NOTIFICATION_MESSAGES.framerateUnderOrEqual0);
+    }
+    if (isNaN(framerate)) {
+        throw new Error(NOTIFICATION_MESSAGES.framerateIsNaN);
+    }
+
+    return framerate;
 }
 
 // @ts-ignore
@@ -17,9 +29,9 @@ function collectDataToSave() {
             return {
                 startTime: segment.startTime,
                 endTime: segment.endTime,
-                selected: segmentElement.selected
             }
         }),
+        selectedIndex: segmentList.getSelectedSegmentIndex(),
         framerate: parseFloat(ELEMENTS.framerateInput.value),
         videoTime: getVideoTime(),
         calculatedTime: ELEMENTS.calculatedTimeText.value
@@ -43,10 +55,11 @@ function restoreData(data: any) {
 
         data.segmentList.forEach((segment: any) => {
             let segmentElement = HTMLSegmentFactory.createSegmentElement(new Segment(segment.startTime, segment.endTime));
-            segmentElement.selected = segment.selected;
             segmentList.addSegment(segmentElement);
 
         });
+
+        segmentList.setSegmentAsSelected(data.selectedIndex);
 
         ELEMENTS.framerateInput.value = isNaN(data.framerate) ? "" : data.framerate;
         ELEMENTS.videoTimeInput.value = data.videoTime == 0 ? "0.0" : data.videoTime;
@@ -55,12 +68,11 @@ function restoreData(data: any) {
 }
 
 function generateModNote() {
-    let totalTime = segmentList.getTotalTime();
-    let segmentsNote = segmentList.segments.map((segment) => {
-        return `${segment.segment.getCalculatedTime().toString()}`
-    }).join(" + ");
+        let totalTime = Time.fromSeconds(segmentList.getTotalTime(),getFramerate());
+        let segmentsNote = segmentList.segments.map((segment) => {
+            return `${segment.segment.getCalculatedTime().toString()}`
+        }).join(" + ");
 
-    let modNote = `Mod Message: The sections ${segmentsNote}, at fps ${getFramerate()} add up to a final time of ${totalTime.toString()}`
 
-    return modNote;
+    return `Mod Message: The sections ${segmentsNote}, at fps ${getFramerate()} add up to a final time of ${totalTime.toString()}`;
 }

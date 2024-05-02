@@ -3,6 +3,8 @@ let functionToInject = function (message: any, _sender: any, sendResponse: (resp
         let time = document.querySelector("video")!.currentTime;
         sendResponse(time.toString());
     }
+
+    sendResponse("No action found");
 }
 
 if (navigator.userAgent.indexOf("Chrome") != -1) {
