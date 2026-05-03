@@ -255,6 +255,7 @@ img {
     display: flex;
     flex-direction: row;
     align-items: center;
+    position:relative;
 }
 
 #calculated-time-container {
@@ -537,8 +538,19 @@ footer > * {
     visibility: visible;
 }
 
+
+
 .divided-segment {
-    border-bottom: 2px solid #f2f2f2;
+    margin-bottom: 20px;
+}
+
+.divided-segment:after {
+    position: absolute;
+    content:"";
+    bottom: -10px;
+    width: 100%;
+    background-color: var(--text5f);
+    height: 1px;
 }
 
 #config-menu {
@@ -552,6 +564,15 @@ footer > * {
     transition: filter 0.3s ease-in 0.1s, top 0.2s ease 0.4s, transform 0.2s ease 0.1s;
     z-index: 777;
     transform: scale(0.95);
+    margin:0;
+    padding:5px;
+}
+
+#change-input-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 42px;
 }
 
 button.mode-active {
@@ -567,6 +588,66 @@ button.mode-active {
 
 .settings-label {
     margin-left: 10px;
+}
+
+#autograb-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.checkbox-div:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--bg-hover);
+    background-color: transparent;
+    border-radius: .5rem;
+    transition: background-color .2s ease,border-color .2s ease
+}
+
+.checkbox-div:hover:before {
+    border-color: var(--bg-click);
+}
+
+.checkbox-div.active:before {
+    border-color: var(--bg-selected);
+}
+
+.checkbox-div {
+    margin: 2.5px 5px;
+    position: relative;
+    padding-left: 3rem;
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-family: var(--font_cursive);
+    color: var(--text20);
+    transition: color .2s ease,border-color .2s ease;
+    border: 0px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none
+}
+
+.checkbox-div:after {
+    content: "";
+    position: absolute;
+    top: .3rem;
+    left: .65rem;
+    width: .375rem;
+    height: 0.8rem;
+    border: solid var(--text);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+
+.checkbox-div.active::after {
+    opacity: 1;
 }
 
 /*

@@ -122,11 +122,12 @@ class HTMLSegmentFactory {
         let segmentText = this.createTimeSegmentElement(segment);
         let resetButton = this.createResetSegmentButton();
         let removeButton = this.createRemoveButton();
+        let checkButton = this.createCheckButton();
         let tooltip = this.createTooltip();
-
         segmentElement.appendChild(segmentText);
         segmentElement.appendChild(resetButton);
         segmentElement.appendChild(removeButton);
+        segmentElement.appendChild(checkButton);
         segmentElement.appendChild(tooltip);
 
         segmentElement.addEventListener("mouseover", () => {
@@ -135,9 +136,8 @@ class HTMLSegmentFactory {
 
             let segmentRect = segmentElement.getBoundingClientRect();
             let tooltipRect = tooltip.getBoundingClientRect();
-
-            tooltip.style.left = segmentRect.left + 'px';
-            tooltip.style.top = segmentRect.bottom - tooltipRect.height - segmentRect.height + 'px';
+            
+            tooltip.style.top = - tooltipRect.height + 'px';
         });
 
         tooltip.querySelector(".tooltipStart")!.addEventListener("click", (e) => {
@@ -238,6 +238,26 @@ class HTMLSegmentFactory {
         removeButton.appendChild(icon);
 
         return removeButton;
+    }
+
+    static createCheckButton(): HTMLButtonElement {
+        let checkButton = document.createElement("button");
+        checkButton.classList.add("check-segment");
+        checkButton.classList.add("icon");
+
+        checkButton.addEventListener("click", () => {
+            let index = segmentList.segments.findIndex((segment) => {
+                return segment.element === checkButton.parentElement;
+            });
+
+            segmentList.checkSegment(index);
+
+        });
+
+        let icon = this.createIcon("icon-checkmark");
+        checkButton.appendChild(icon);
+
+        return checkButton;
     }
 
     static createTooltip(): HTMLSpanElement {
@@ -384,6 +404,18 @@ class SegmentList {
 
 
     }
+
+    checkSegment(index: number) {
+        let segment = this.segments[index];
+        if (segment.selected) {
+
+            if (this.segments[index + 1]) {
+                this.setSegmentAsSelected(index + 1);
+            } else if (this.segments[index - 1]) {
+                this.setSegmentAsSelected(index - 1);
+            }
+        }
+    };
 
     generateDefaultSegment() {
         let segmentElement = HTMLSegmentFactory.createSegmentElement(ModeManager.getCurrentMode().getStartingSegment());

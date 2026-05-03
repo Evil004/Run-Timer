@@ -101,5 +101,8 @@ const BUTTONS:{
     previousFrameBtn: document.querySelector("#previous-frame")!,
 };
 
-
-
+const CHECKBOXES:{
+    autoGrabFrameCb: HTMLDivElement; 
+} = {
+    autoGrabFrameCb: document.querySelector("#autograb-cb")!,
+};

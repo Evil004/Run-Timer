@@ -121,7 +121,7 @@ document.getElementById('theme-d-btn')?.addEventListener('click', () => {
         '--bg-hover': '#151c27',
         '--bg-hoveraa': '#151c27aa',
         '--bg-click': '#243348',
-        '--bg-selected': '#121a25',
+        '--bg-selected': '#415674',
         '--link': '#ec7c04',
     }
     setTheme(themeColors);
@@ -195,4 +195,47 @@ function setActiveButton(activeButton: HTMLButtonElement): void {
         button.classList.remove('mode-active');
     });
     activeButton.classList.add('mode-active');
+}
+
+const autoGrabCb = document.getElementById('autograb-cb');
+
+if (autoGrabCb) {
+
+  let isChecked = localStorage.getItem('autograbChecked') === 'true';
+  autoGrabCb.classList.toggle('active', isChecked);
+  document.getElementById('exact-time-btn')!.style.display = isChecked ? 'none' : 'inline';
+
+  let intervalId: number | null = null;
+
+  const startLoop = () => {
+    if (intervalId === null) {
+      intervalId = window.setInterval(() => {
+        const fps = getFramerate();
+        browserAction.getVideoSeconds().then((response) => {
+          const time = Math.floor(response * fps) / fps;
+          ELEMENTS.videoTimeInput.value = time.toString();
+        });
+      }, 16); //ms
+    }
+  };
+
+  const stopLoop = () => {
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+
+  if (isChecked) startLoop();
+
+  autoGrabCb.addEventListener('click', () => {
+    isChecked = !isChecked;
+    autoGrabCb.classList.toggle('active', isChecked);
+    document.getElementById('exact-time-btn')!.style.display = isChecked ? 'none' : 'inline';
+
+    localStorage.setItem('autograbChecked', isChecked.toString());
+
+    if (isChecked) startLoop();
+    else stopLoop();
+  });
 }

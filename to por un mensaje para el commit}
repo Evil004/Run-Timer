@@ -1,0 +1,271 @@
+[33mcommit a52b5a17434decdd398b3925e58fa6b56164678d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrefactor[m[33m, [m[1;31morigin/refactor[m[33m)[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Wed Jan 29 23:08:50 2025 +0100
+
+    Refactor build scripts in package.json for improved functionality
+
+[33mcommit 8c65746824d65229304ccc0399624268567a7776[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Wed Jan 29 22:13:43 2025 +0100
+
+    Refactor time validation logic in SubstractMode to improve segment handling
+
+[33mcommit 2b7b13ba79653aa8abe837a94f5c16085128c46e[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Wed Jan 29 22:03:32 2025 +0100
+
+    Added next/previous frame functionality
+
+[33mcommit abad2dd2be06a90a96576770de778b9dcc158c48[m
+Merge: 5227349 9dd6221
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Tue Jan 28 00:24:04 2025 +0100
+
+    Merge commit '9dd62210adb3ce015c372aef2fee273306cabaae' into refactor
+
+[33mcommit 9dd62210adb3ce015c372aef2fee273306cabaae[m
+Merge: 665d494 5227349
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Tue Jan 28 00:22:53 2025 +0100
+
+    Merge Nia
+
+[33mcommit 5227349ede08399db7afe7b2b6e78d7a7bd367e4[m[33m ([m[1;32mNia[m[33m)[m
+Author: Aoh-Nia <ainhoa.genshin@gmail.com>
+Date:   Mon Jan 27 22:58:26 2025 +0100
+
+    Remade icons and added config
+
+[33mcommit 665d494e9cfe7299bb479ca2549a868e6418408b[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Mon Jan 27 22:44:39 2025 +0100
+
+    Added scrolling to the selected input in SRC
+
+[33mcommit 1a5918c7488c673c9cbc0a388955db9c9008c139[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Mon Jan 27 15:49:03 2025 +0100
+
+    ⏰ Added functionality to set video time
+
+[33mcommit ca989e66f282770b420742d8c3d71318ca3e6fa4[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Mon Jan 27 15:17:22 2025 +0100
+
+    Reset all data now updates mode styles appropriately
+
+[33mcommit 2cd93d4e628c3f67dd2386712587c1ca715e935b[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Mon Jan 27 15:12:24 2025 +0100
+
+    Updated error notifications in SubstractMode
+
+[33mcommit 62e1862c9d799499c86603ef277c8929c4fddc68[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Sun Jan 26 21:21:45 2025 +0100
+
+    Added divider for substract
+
+[33mcommit 54e6c4da041066d94b9546ab2d7b85de90fb1f36[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Sun Jan 26 20:10:20 2025 +0100
+
+    AÃdded button to switch between modes
+
+[33mcommit c7a1a3a700a7b9db7142c214e2019a1597586bac[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Sun Jan 26 18:59:21 2025 +0100
+
+    Added modes, fixed notifications not showing
+
+[33mcommit 57f0560898406552fa9263972d3b54023c1e55e0[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Sun Jan 26 03:21:04 2025 +0100
+
+    first aproach substract Mode
+
+[33mcommit 86a985bf98ed621bb098c76dff883bdef7eb6921[m
+Author: Óscar <oscarferna08@gmail.com>
+Date:   Sun Jan 26 01:39:24 2025 +0100
+
+    Refactored Files and added 'Not set' to start time
+
+[33mcommit b7c10b55caca9f7cf5c0fb1221010c25b19fbb74[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Fri May 3 00:04:34 2024 +0200
+
+    Tooltip for the segments
+
+[33mcommit 69968f78eb85ce48166e3b86e4773144effa91b5[m
+Author: Evil004 <oscarferna08@gmail.com>
+Date:   Thu May 2 22:01:59 2024 +0200
+
+    Fixed bugs
+
+[33mcommit 486bcf58147b25883de357dd55e1b10155d1d966[m
+Author: Evil004 <oscarferna08@gmail.com>
+Date:   Wed May 1 23:10:40 2024 +0200
+
+    Notifications && confirm modal
+
+[33mcommit e446790bc32445b1980e82aaeb743ca0961d70dd[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Wed May 1 22:06:47 2024 +0200
+
+    Mod Note
+
+[33mcommit 83e6c01ca5c16031f4691be38419f2668aadeea3[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Wed May 1 21:54:59 2024 +0200
+
+    Transfer time to SRC
+
+[33mcommit 541bdf97444c556364524cec02330e2c0a7d926f[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Wed May 1 18:57:10 2024 +0200
+
+    Calculate button
+
+[33mcommit c7d71812de21ad10bb7eda484f160fcc96099466[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Wed May 1 18:45:04 2024 +0200
+
+    Save and restore from storage and rese all
+
+[33mcommit bd09571383b57194eb6bb674068960105abe1d91[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Wed May 1 15:28:43 2024 +0200
+
+    Working on both browsers and build
+
+[33mcommit 05a02add071303a29b2eb20df94a5533308bd0db[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Wed May 1 13:20:32 2024 +0200
+
+    Segment Logic
+
+[33mcommit 45e0ddaf5143c56e845ae7cb62a34b47583e5199[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Tue Apr 30 21:33:29 2024 +0200
+
+    Messages of firefox and chrome in one
+
+[33mcommit a175f9578b2e87ae8dd6750e9411391225eb3745[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Sun Apr 28 23:40:12 2024 +0200
+
+    renamed injectSRC.js -> injectToSRC.js
+
+[33mcommit 4cf4b41a65f5e3d04ff58ad988dd7aa1d9e51585[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Oscar Fernandez <oscarferna08@gmail.com>
+Date:   Sun Apr 28 22:26:12 2024 +0200
+
+    LICENSE Update
+
+[33mcommit 0037ead7fed26cc42072da43b938799cef9d0d72[m[33m ([m[1;33mtag: [m[1;33mv1.0.3[m[33m)[m
+Author: Oscar Fernandez <oscarferna08@gmail.com>
+Date:   Tue Apr 16 09:22:13 2024 +0200
+
+    Changed Chrome Link in README.md
+
+[33mcommit d33c52dfbced7ab0c6204ba5ae6a27e856c71347[m
+Author: Oscar Fernandez <oscarferna08@gmail.com>
+Date:   Mon Apr 15 22:58:24 2024 +0200
+
+    Updated Firefox Link on README.md
+
+[33mcommit 28fc50c091b4895583d9e5ec1be532ab5fa4fe90[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Mon Apr 15 22:42:21 2024 +0200
+
+    changed version to 1.0.3
+
+[33mcommit 6744dc75922c7233c33e55fc561e896914989b25[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Mon Apr 15 22:36:20 2024 +0200
+
+    Changed 'Youtube Run-Timer' for 'Run-Timer'
+
+[33mcommit 65531ff6ec37087b9076f11d8901237cbef86940[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Thu Apr 11 22:35:49 2024 +0200
+
+    Added Twitch compatibility
+
+[33mcommit 0c3ad4cd73db579403bbcde282f7259dc1688112[m
+Author: Evil004 <oscarferna08@gmail.com>
+Date:   Mon Feb 26 14:39:59 2024 +0100
+
+    fixed not selected entry on first install
+
+[33mcommit 27c44b3bf7f1968d3f4251b95e4db3b4c5fa9419[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Sun Feb 25 21:49:10 2024 +0100
+
+    Fixed value only updating visually on firefox
+
+[33mcommit a6f4d0329554d61d034764db5ecefac651ae2da2[m
+Author: Oscar <10717328@ieselcaminas.org>
+Date:   Sun Feb 25 21:46:40 2024 +0100
+
+    Fixed value only updating visually
+
+[33mcommit f914d0790281cdae77cacb6b9c2a30bbbade209f[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Fri Jul 21 02:03:27 2023 +0200
+
+    v1.0.1 list fix
+
+[33mcommit 19f561d30c5265e3667abc5005f429c14bb1c2e0[m
+Merge: 7d98d5e 4691b11
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Fri Jul 21 01:33:13 2023 +0200
+
+    v1.0.1
+
+[33mcommit 7d98d5ef5860e60451c002863b68c046d3a24f78[m
+Merge: 5e51d34 b408e81
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Fri Jul 21 01:28:25 2023 +0200
+
+    Merge branch 'main' of https://github.com/Evil004/FrameTimerExtension
+
+[33mcommit 4691b115191b147d3e8388f5aa430ed1cdc72db3[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Fri Jul 21 01:28:17 2023 +0200
+
+    v1.0.1
+
+[33mcommit 77e0f6c8d761ed0eaa66de6de67373234e64f841[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Thu Jul 20 22:07:44 2023 +0200
+
+    BugFixes
+
+[33mcommit db32aa4c783e40ab2a7a2edd38972c546d5f21bd[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Thu Jul 20 20:09:26 2023 +0200
+
+    Refactor done, falta test y bugfix
+
+[33mcommit c9483436cd5a28e684310fc6cb583ff7ff769b22[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Thu Jul 20 17:07:07 2023 +0200
+
+    Somre refactor done
+
+[33mcommit 40c1200bf15f9456efb57408b852959aae2acb4c[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Thu Jul 20 12:31:04 2023 +0200
+
+    Some refactors
+
+[33mcommit b408e81e219d1057d417f0518492ca1a9fef9f36[m
+Author: Oscar Fernandez <oscarferna08@gmail.com>
+Date:   Thu Jul 20 10:45:19 2023 +0200
+
+    added link to Firefox Addon and link to error report
+
+[33mcommit 5e51d348b09c399af9b01316b89245197789a56c[m
+Author: Oscar <oscarferna08@gmail.com>
+Date:   Wed Jul 19 21:44
